@@ -128,10 +128,6 @@ app.get("/", (req: Request, res: Response) => {
 // Routes
 // app.use("/v1", r);
 
-app.get("/api/secure-data", (req: Request, res: Response) => {
-  res.json({ data: "secret" });
-});
-
 
 // 404 handler
 app.use((req: Request, res: Response) => {
