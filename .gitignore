@@ -1,0 +1,72 @@
+# Node dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+.pnpm-debug.log
+
+# Env and secrets
+.env
+.env.*
+!.env.example
+
+# TypeScript build output
+dist/
+build/
+out/
+coverage/
+lib/
+*.tsbuildinfo
+
+# VSCode settings
+.vscode/
+.history/
+.sublime*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Apollo/GraphQL codegen and tooling
+**/__generated__/
+graphql.schema.json
+graphql.schema.graphql
+schema.graphql
+schema.json
+
+# Test output
+coverage/
+.nyc_output/
+test_output/
+
+# Logs and pids
+logs/
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Misc
+.idea/
+*.swp
+*.swo
+
+# Mac/Windows folders
+ehthumbs.db
+Icon?
+desktop.ini
+
+# Optional: Uncomment if you use Docker
+# docker-compose*.yml
+# Dockerfile*
+# .dockerignore
+
+# Optional: Uncomment if you use Next.js or other frameworks
+# .next/
+# out/
+
+
+# certificates temperory files
+certs/
