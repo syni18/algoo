@@ -1,6 +1,6 @@
 export const chatService = {
   async processMessage(message: string): Promise<string> {
-    // Your business logic here, e.g., sanitize, store, broadcast
+    await Promise.resolve(); // dummy await to satisfy ESLint
     return `Processed chat message: ${message}`;
   },
 };

@@ -1,7 +1,5 @@
-// src/metrics.ts
-
-import { Registry, collectDefaultMetrics, Counter, Histogram } from 'prom-client';
-import { Request, Response, NextFunction } from 'express';
+import type { Application, NextFunction, Request, Response } from 'express';
+import { collectDefaultMetrics, Counter, Histogram, Registry } from 'prom-client';
 
 const register = new Registry();
 collectDefaultMetrics({ register });
@@ -20,21 +18,35 @@ const responseTimeHistogram = new Histogram({
 });
 
 export function metricsMiddleware(req: Request, res: Response, next: NextFunction) {
-  const route = req.route?.path || req.path;
-  const method = req.method;
+  const route: string =
+    typeof (req.route as { path?: unknown })?.path === 'string'
+      ? (req.route as { path: string }).path
+      : req.path;
+
+  const method: string = req.method;
   const start = Date.now();
+
   res.on('finish', () => {
     const duration = Date.now() - start;
-    const status = res.statusCode;
-    requestCounter.labels(method, route, String(status)).inc();
-    responseTimeHistogram.labels(method, route, String(status)).observe(duration);
+    const status: string = String(res.statusCode);
+    requestCounter.labels(method, route, status).inc();
+    responseTimeHistogram.labels(method, route, status).observe(duration);
   });
+
   next();
 }
 
-export function exposeMetricsEndpoint(app: any) {
-  app.get('/metrics', async (_: Request, res: Response) => {
-    res.set('Content-Type', register.contentType);
-    res.end(await register.metrics());
+export function exposeMetricsEndpoint(app: Application) {
+  app.get('/metrics', (_: Request, res: Response) => {
+    register
+      .metrics()
+      .then((metrics) => {
+        res.set('Content-Type', register.contentType);
+        res.end(metrics);
+      })
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        res.status(500).end(message);
+      });
   });
 }
