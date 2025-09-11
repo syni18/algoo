@@ -16,6 +16,7 @@ COPY ../webpack.config.ts .
 COPY ../certs/localhost-key.pem ./certs/
 COPY ../certs/localhost.pem ./certs/
 
+
 # Build the project
 RUN npm run build
 

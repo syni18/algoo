@@ -1,4 +1,6 @@
 // src/server.ts
+import { checkDatabaseConnections } from '@config/postgres.js';
+import { checkRedisConnection } from '@config/redis.js';
 import fs from 'fs';
 import https from 'https';
 
@@ -26,6 +28,14 @@ if (sslKeyPath && sslCertPath && fs.existsSync(sslKeyPath) && fs.existsSync(sslC
       }]`,
     );
   });
+  // Check DB connections on startup
+  checkDatabaseConnections().catch((err) => {
+    logger.error('Error checking database connections:', err);
+  });
+  // Check Redis connection on startup
+  checkRedisConnection().catch((err) => {
+    logger.error('Error checking Redis connection:', err);
+  });
 } else {
   server = app.listen(port, () => {
     logger.info(
@@ -39,6 +49,14 @@ if (sslKeyPath && sslCertPath && fs.existsSync(sslKeyPath) && fs.existsSync(sslC
     if (!sslCertPath || !fs.existsSync(sslCertPath)) {
       logger.warn('No SSL cert found; running in HTTP mode.');
     }
+  });
+  // Check DB connections on startup
+  checkDatabaseConnections().catch((err) => {
+    logger.error('Error checking database connections:', err);
+  });
+  // Check Redis connection on startup
+  checkRedisConnection().catch((err) => {
+    logger.error('Error checking Redis connection:', err);
   });
 }
 
