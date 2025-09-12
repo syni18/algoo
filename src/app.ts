@@ -15,11 +15,11 @@ import toobusy from 'toobusy-js';
 import morganLogger from './logger/morgan-logger.js';
 import { exposeMetricsEndpoint, metricsMiddleware } from './metrics.js';
 import errorHandler from './middlewares/errorHandler.js';
-import { formatMetricsJson, getMetricsSnapshot } from 'system/sys.js';
+import { collectMetricsSafely } from 'system/sys.js';
 import logger from 'logger/winston-logger.js';
 import { renderHealthHTML } from 'HTML/healthView.js';
 
-// import r from "./routes/index.js";
+import {httpRoutes} from "./routes/index.js";
 
 const app = express();
 
@@ -109,7 +109,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.get("/health", (req: Request, res: Response) => {
-  const snap = getMetricsSnapshot();
+  const snap = collectMetricsSafely();
 
   if (!snap) {
     return res.status(500).send("<h1>No metrics available</h1>");
@@ -136,7 +136,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Routes
-// app.use("/v1", r);
+app.use("/api", httpRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

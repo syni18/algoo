@@ -1,6 +1,8 @@
 // src/server.ts
 import { checkDatabaseConnections } from '@config/postgres.js';
 import { checkRedisConnection } from '@config/redis.js';
+import { checkInfluxConnection } from '@config/influxDB.js';
+
 import fs from 'fs';
 import https from 'https';
 
@@ -15,9 +17,7 @@ const sslCertPath = process.env.SSL_CERT;
 
 let server;
 
-/**
- * ✅ Start server
- */
+// Start server
 if (sslKeyPath && sslCertPath && fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath)) {
   const key = fs.readFileSync(sslKeyPath);
   const cert = fs.readFileSync(sslCertPath);
@@ -35,6 +35,10 @@ if (sslKeyPath && sslCertPath && fs.existsSync(sslKeyPath) && fs.existsSync(sslC
   // Check Redis connection on startup
   checkRedisConnection().catch((err) => {
     logger.error('Error checking Redis connection:', err);
+  });
+  // Check InfluxDB connection on startup
+  checkInfluxConnection().catch((err) => {
+    logger.error('Error checking InfluxDB connection:', err);
   });
 } else {
   server = app.listen(port, () => {
@@ -58,16 +62,16 @@ if (sslKeyPath && sslCertPath && fs.existsSync(sslKeyPath) && fs.existsSync(sslC
   checkRedisConnection().catch((err) => {
     logger.error('Error checking Redis connection:', err);
   });
+  // Check InfluxDB connection on startup
+  checkInfluxConnection().catch((err) => {
+    logger.error('Error checking InfluxDB connection:', err);
+  });
 }
 
-/**
- * ✅ Setup WebSocket Server
- */
+// Setup WebSocket Server
 setupWebSocketServer(server);
 
-/**
- * ✅ Cleanup logic for graceful shutdown
- */
+// Cleanup logic for graceful shutdown
 const cleanup = async () => {
   await closeWebSocketServer();
   logger.info('Cleanup complete. (Close DB, flush logs, etc.)');
