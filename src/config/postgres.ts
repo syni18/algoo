@@ -1,6 +1,8 @@
 import logger from 'logger/winston-logger';
 import CircuitBreaker from 'opossum';
 import { Pool } from 'pg';
+import dotenv from 'dotenv';
+dotenv.config();
 
 type QueryParam = string | number | boolean | null | Date | Buffer;
 

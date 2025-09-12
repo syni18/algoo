@@ -15,6 +15,9 @@ import toobusy from 'toobusy-js';
 import morganLogger from './logger/morgan-logger.js';
 import { exposeMetricsEndpoint, metricsMiddleware } from './metrics.js';
 import errorHandler from './middlewares/errorHandler.js';
+import { formatMetricsJson, getMetricsSnapshot } from 'system/sys.js';
+import logger from 'logger/winston-logger.js';
+import { renderHealthHTML } from 'HTML/healthView.js';
 
 // import r from "./routes/index.js";
 
@@ -105,15 +108,27 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({
-    status: 'ok',
-    service: 'algoo-api',
-    version: '1.0.0',
-    environment: process.env.NODE_ENV || 'development',
-    uptime: process.uptime().toFixed(2) + 's',
+app.get("/health", (req: Request, res: Response) => {
+  const snap = getMetricsSnapshot();
+
+  if (!snap) {
+    return res.status(500).send("<h1>No metrics available</h1>");
+  }
+
+  const meta = {
+    status: "ok",
+    service: "algoo-api",
+    version: "1.0.0",
+    environment: process.env.NODE_ENV || "development",
+    uptime: process.uptime().toFixed(2) + "s",
     timestamp: new Date().toISOString(),
-  });
+  };
+
+  if (req.query.format === "html") {
+    res.send(renderHealthHTML(snap, meta));
+  } else {
+    res.json({ ...meta, metrics: snap });
+  }
 });
 
 app.get('/', (req: Request, res: Response) => {
