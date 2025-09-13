@@ -1,7 +1,7 @@
-import { runCmd } from '../utils/runCmd.js';
-import { readFile } from '../utils/readFile.js';
 import { BatteryInfo } from 'interfaces.js';
 
+import { readFile } from '../utils/readFile.js';
+import { runCmd } from '../utils/runCmd.js';
 
 // Battery Information
 export const getBatteryInfo = (): BatteryInfo | null => {
@@ -41,12 +41,8 @@ export const getBatteryInfo = (): BatteryInfo | null => {
       };
     }
   } else if (process.platform === 'win32') {
-    const level = runCmd(
-      'wmic path win32_battery get estimatedchargeremaining /value | find "="'
-    );
-    const status = runCmd(
-      'wmic path win32_battery get batterystatus /value | find "="'
-    );
+    const level = runCmd('wmic path win32_battery get estimatedchargeremaining /value | find "="');
+    const status = runCmd('wmic path win32_battery get batterystatus /value | find "="');
     return level
       ? {
           level: parseInt(level.split('=')[1]),

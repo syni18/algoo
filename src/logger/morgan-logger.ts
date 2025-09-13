@@ -24,12 +24,12 @@ morgan.token('colored-status', (req, res) => {
     status >= 500
       ? 'red'
       : status >= 400
-      ? 'yellow'
-      : status >= 300
-      ? 'cyan'
-      : status >= 200
-      ? 'green'
-      : 'white';
+        ? 'yellow'
+        : status >= 300
+          ? 'cyan'
+          : status >= 200
+            ? 'green'
+            : 'white';
   return chalk[color](status.toString());
 });
 
@@ -40,12 +40,12 @@ morgan.token('colored-method', (req) => {
     method === 'GET'
       ? 'green'
       : method === 'POST'
-      ? 'magenta'
-      : method === 'PUT'
-      ? 'yellow'
-      : method === 'DELETE'
-      ? 'red'
-      : 'white';
+        ? 'magenta'
+        : method === 'PUT'
+          ? 'yellow'
+          : method === 'DELETE'
+            ? 'red'
+            : 'white';
   return chalk[color](method.padEnd(6)); // Pad for alignment
 });
 

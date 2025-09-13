@@ -1,6 +1,7 @@
-import os from 'os';
-import { readFile } from '../utils/readFile.js';
 import { MemoryInfo } from 'interfaces.js';
+import os from 'os';
+
+import { readFile } from '../utils/readFile.js';
 
 // Memory Information
 export const getExtendedMemoryInfo = (): MemoryInfo => {
@@ -15,7 +16,7 @@ export const getExtendedMemoryInfo = (): MemoryInfo => {
     if (meminfo) {
       const lines = meminfo.split('\n');
       const getValue = (key: string) => {
-        const line = lines.find(l => l.startsWith(key));
+        const line = lines.find((l) => l.startsWith(key));
         return line ? parseInt(line.split(/\s+/)[1]) * 1024 : undefined;
       };
 
@@ -32,4 +33,3 @@ export const getExtendedMemoryInfo = (): MemoryInfo => {
 
   return base;
 };
-

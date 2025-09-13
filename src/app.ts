@@ -7,19 +7,18 @@ import express, { Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import fs from 'fs';
 import helmet from 'helmet';
+import { renderHealthHTML } from 'HTML/healthView.js';
+import logger from 'logger/winston-logger.js';
 import morgan from 'morgan';
 import path from 'path';
+import { collectMetrics, getLastMetricsSnapshot } from 'system/index.js';
 import toobusy from 'toobusy-js';
 
 // Custom modules
 import morganLogger from './logger/morgan-logger.js';
 import { exposeMetricsEndpoint, metricsMiddleware } from './metrics.js';
 import errorHandler from './middlewares/errorHandler.js';
-import { collectMetrics, getLastMetricsSnapshot } from 'system/index.js';
-import logger from 'logger/winston-logger.js';
-import { renderHealthHTML } from 'HTML/healthView.js';
-
-import {httpRoutes} from "./routes/index.js";
+import { httpRoutes } from './routes/index.js';
 
 const app = express();
 
@@ -108,46 +107,45 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.get("/health", async (req: Request, res: Response) => {
+app.get('/health', async (req: Request, res: Response) => {
   const meta = {
-    status: "ok",
-    service: "algoo-api",
-    version: "1.0.0",
-    environment: process.env.NODE_ENV || "development",
-    uptime: process.uptime().toFixed(2) + "s",
+    status: 'ok',
+    service: 'algoo-api',
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    uptime: process.uptime().toFixed(2) + 's',
     timestamp: new Date().toISOString(),
   };
 
   try {
     let snap = await getLastMetricsSnapshot();
-    logger.info("Serving /health with cached metrics snapshot");
+    logger.info('Serving /health with cached metrics snapshot');
 
     if (!snap) {
-      logger.info("No cached snapshot, collecting fresh metrics");
+      logger.info('No cached snapshot, collecting fresh metrics');
       snap = await collectMetrics();
     }
 
     // If no cached snapshot or you want fresh every call:
     // snap = await collectMetrics();
 
-    if (req.query.format === "html") {
+    if (req.query.format === 'html') {
       // Implement your HTML render function or fallback
       res.send(renderHealthHTML(snap, meta));
     } else {
       res.json({ ...meta, metrics: snap });
     }
   } catch (err) {
-    res.status(500).json({ ...meta, status: "error", error: (err as Error).message });
+    res.status(500).json({ ...meta, status: 'error', error: (err as Error).message });
   }
 });
-
 
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({ message: 'Welcome to the Secure Algoo API!' });
 });
 
 // Routes
-app.use("/api", httpRoutes);
+app.use('/api', httpRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response) => {

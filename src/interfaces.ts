@@ -111,15 +111,15 @@ export interface ServiceMeta {
 }
 
 export interface Job {
-    id: number;
-    message: any;
-    resolve: (result: any) => void;
-    reject: (error: any) => void;
-    timeout?: NodeJS.Timeout;
+  id: number;
+  message: any;
+  resolve: (result: any) => void;
+  reject: (error: any) => void;
+  timeout?: NodeJS.Timeout;
 }
 
 export interface WorkerMessage {
-    type?: string;
+  type?: string;
 }
 
 export interface BatteryInfo {
@@ -128,13 +128,13 @@ export interface BatteryInfo {
 }
 
 export interface CpuInfo {
-    cores: number;
-    model: string;
-    loadAverage: number[];
-    arch: string;
-    temperature?: number;
-    frequency?: number; // in MHz
-    usage?: number; // in percentage
+  cores: number;
+  model: string;
+  loadAverage: number[];
+  arch: string;
+  temperature?: number;
+  frequency?: number; // in MHz
+  usage?: number; // in percentage
 }
 
 export interface DiskInfo {
@@ -150,20 +150,20 @@ export interface GpuInfo {
 }
 
 export interface MemoryInfo {
-    total: number; // in bytes
-    free: number; // in bytes
-    used: number; // in bytes
-    available?: number; // in bytes (Linux only)
-    cached?: number; // in bytes (Linux only)
-    buffers?: number; // in bytes (Linux only)
-    swapTotal?: number; // in bytes (Linux only)
-    swapUsed?: number; // in bytes (Linux only)
+  total: number; // in bytes
+  free: number; // in bytes
+  used: number; // in bytes
+  available?: number; // in bytes (Linux only)
+  cached?: number; // in bytes (Linux only)
+  buffers?: number; // in bytes (Linux only)
+  swapTotal?: number; // in bytes (Linux only)
+  swapUsed?: number; // in bytes (Linux only)
 }
 
 export interface NetworkInfo {
-    interfaces?: string | null;
-    connections?: string | null;
-    bandwidth?: string | null;
+  interfaces?: string | null;
+  connections?: string | null;
+  bandwidth?: string | null;
 }
 
 export interface SystemInfo {
@@ -179,16 +179,16 @@ export interface SystemInfo {
 }
 
 export interface ProcessInfo {
-    pid: number;
-    platform: NodeJS.Platform;
-    nodeVersion: string;
-    uptime: number;
-    memoryUsage: NodeJS.MemoryUsage;
-    cpuUsage: NodeJS.CpuUsage;
-    cwd: string;
-    execPath: string;
-    env: NodeJS.ProcessEnv;
-    threads?: number; // Number of active threads (if available)
+  pid: number;
+  platform: NodeJS.Platform;
+  nodeVersion: string;
+  uptime: number;
+  memoryUsage: NodeJS.MemoryUsage;
+  cpuUsage: NodeJS.CpuUsage;
+  cwd: string;
+  execPath: string;
+  env: NodeJS.ProcessEnv;
+  threads?: number; // Number of active threads (if available)
 }
 
 export interface SecurityInfo {
@@ -209,30 +209,30 @@ export interface servicesInfo {
 }
 
 export interface SystemMetricsSnapshot {
-    ts: number;
-    cpu: CPUMetrics;
-    memory: MemoryMetrics;
-    process: {
-        pid: number;
-        cpuUsage: NodeJS.CpuUsage;
-        memoryUsage: NodeJS.MemoryUsage;
-        uptime: number;
-        threads?: number;
-    };
-    disk: DiskMetrics;
-    network: NetworkMetrics;
-    system: SystemMetrics;
-    gpu?: GPUMetrics;
-    battery?: {
-        level: number | null;     // Battery percentage
-        status: string | null;    // Charging/discharging
-        timeRemaining?: number;   // Time remaining in minutes
-    } | null;
-    sensors?: {
-        temperature: Record<string, number>; // Various temperature sensors
-        fans: Record<string, number>;        // Fan speeds
-        voltage: Record<string, number>;     // Voltage readings
-    };
-    services?: ServicesMetrics;
-    security?: SecurityMetrics;
+  ts: number;
+  cpu: CPUMetrics;
+  memory: MemoryMetrics;
+  process: {
+    pid: number;
+    cpuUsage: NodeJS.CpuUsage;
+    memoryUsage: NodeJS.MemoryUsage;
+    uptime: number;
+    threads?: number;
+  };
+  disk: DiskMetrics;
+  network: NetworkMetrics;
+  system: SystemMetrics;
+  gpu?: GPUMetrics;
+  battery?: {
+    level: number | null; // Battery percentage
+    status: string | null; // Charging/discharging
+    timeRemaining?: number; // Time remaining in minutes
+  } | null;
+  sensors?: {
+    temperature: Record<string, number>; // Various temperature sensors
+    fans: Record<string, number>; // Fan speeds
+    voltage: Record<string, number>; // Voltage readings
+  };
+  services?: ServicesMetrics;
+  security?: SecurityMetrics;
 }

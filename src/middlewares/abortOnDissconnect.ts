@@ -1,4 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
+
 import abortManager from '../utils/abortManager.js';
 
 // Extend Express Request interface to include abort properties
@@ -19,13 +20,13 @@ function attachAbortController(req: Request, res: Response, next: NextFunction):
 
   const cleanup = (): void => {
     if (!controller.signal.aborted) {
-      controller.abort(new Error("client-disconnect"));
+      controller.abort(new Error('client-disconnect'));
     }
     abortManager.abort(id);
   };
 
-  req.on("close", cleanup);
-  res.on("finish", cleanup);
+  req.on('close', cleanup);
+  res.on('finish', cleanup);
 
   next();
 }

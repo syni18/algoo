@@ -1,41 +1,41 @@
-import os from 'os';
-import { readFile } from "../utils/readFile.js";
-import { runCmd } from "../utils/runCmd.js";
 import { CpuInfo } from 'interfaces.js';
+import os from 'os';
+
+import { readFile } from '../utils/readFile.js';
+import { runCmd } from '../utils/runCmd.js';
 
 // Function to get comprehensive CPU information
 export const getCpuInfo = (): CpuInfo => {
-    return {
-        cores: getCpuCores(),
-        model: getCpuModel(),
-        loadAverage: getCpuLoadAverage(),
-        arch: getCpuArch(),
-        temperature: getCpuTemperature(),
-        frequency: getCpuFrequency(),
-        usage: getCpuUsage()
-    };
-}
+  return {
+    cores: getCpuCores(),
+    model: getCpuModel(),
+    loadAverage: getCpuLoadAverage(),
+    arch: getCpuArch(),
+    temperature: getCpuTemperature(),
+    frequency: getCpuFrequency(),
+    usage: getCpuUsage(),
+  };
+};
 
 // Function to get number of CPU cores
 export const getCpuCores = (): number => {
-    return os.cpus().length;
-}
+  return os.cpus().length;
+};
 
 // Function to get CPU model
 export const getCpuModel = (): string => {
-    return os.cpus()[0].model;
-}
+  return os.cpus()[0].model;
+};
 
 // Function to get CPU load average
 export const getCpuLoadAverage = (): number[] => {
-    return os.loadavg();
+  return os.loadavg();
 };
 
 // Function to get CPU architecture
 export const getCpuArch = (): string => {
-    return os.arch();
+  return os.arch();
 };
-
 
 // Function to get CPU temperature
 export const getCpuTemperature = (): number | undefined => {
@@ -57,7 +57,6 @@ export const getCpuFrequency = (): number | undefined => {
   }
   return undefined;
 };
-
 
 // Function to get CPU usage
 export const getCpuUsage = (): number | undefined => {

@@ -1,21 +1,21 @@
 // src/server.ts
+import { register } from 'node:module';
+import { pathToFileURL } from 'node:url';
+
+import { checkInfluxConnection } from '@config/influxDB.js';
 import { checkDatabaseConnections } from '@config/postgres.js';
 import { checkRedisConnection } from '@config/redis.js';
-import { checkInfluxConnection } from '@config/influxDB.js';
-import { pathToFileURL } from 'node:url';
-import { register } from 'node:module';
 
-register("ts-node/esm", pathToFileURL("./"));
+register('ts-node/esm', pathToFileURL('./'));
 
 import fs from 'fs';
 import https from 'https';
+import { shutdownMetricsPool } from 'system/index.js';
 
 import app from './app.js';
 import logger from './logger/winston-logger.js';
 import gracefulShutdown from './utils/gracefulShutdown.js';
 import { closeWebSocketServer, setupWebSocketServer } from './wss.js';
-import { shutdownMetricsPool } from 'system/index.js';
-
 
 const port = process.env.PORT ? Number(process.env.PORT) : 8888;
 const sslKeyPath = process.env.SSL_KEY;

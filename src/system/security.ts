@@ -1,5 +1,6 @@
-import { SecurityInfo } from "interfaces.js";
-import { runCmd } from "../utils/runCmd.js";
+import { SecurityInfo } from 'interfaces.js';
+
+import { runCmd } from '../utils/runCmd.js';
 
 // Security Information
 export const getSecurityInfo = (): SecurityInfo => {
@@ -16,16 +17,15 @@ export const getSecurityInfo = (): SecurityInfo => {
     updates = updatesRaw ? updatesRaw : undefined; // null → undefined
   } else if (process.platform === 'darwin') {
     firewall =
-      runCmd('sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate')?.includes('enabled') ||
-      false;
+      runCmd('sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate')?.includes(
+        'enabled',
+      ) || false;
     const updatesRaw = runCmd('softwareupdate -l 2>/dev/null');
     updates = updatesRaw ? updatesRaw : undefined;
   } else if (process.platform === 'win32') {
-    firewall =
-      runCmd('netsh advfirewall show allprofiles | find "State"')?.includes('ON') ||
-      false;
+    firewall = runCmd('netsh advfirewall show allprofiles | find "State"')?.includes('ON') || false;
     const avRaw = runCmd(
-      'wmic /namespace:\\\\root\\securitycenter2 path antivirusproduct get displayname'
+      'wmic /namespace:\\\\root\\securitycenter2 path antivirusproduct get displayname',
     );
     antivirus = avRaw ? avRaw : undefined;
   }

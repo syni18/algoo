@@ -1,5 +1,5 @@
 // abortManager.ts
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
 
 type AbortEntry = {
   id: string;
@@ -18,7 +18,7 @@ class AbortManager {
 
     if (timeoutMs) {
       entry.timer = setTimeout(() => {
-        controller.abort(new Error("timeout"));
+        controller.abort(new Error('timeout'));
       }, timeoutMs);
     }
 
@@ -30,7 +30,7 @@ class AbortManager {
     const entry = this.controllers.get(id);
     if (!entry) return;
     if (!entry.controller.signal.aborted) {
-      entry.controller.abort(new Error("manual-abort"));
+      entry.controller.abort(new Error('manual-abort'));
     }
     if (entry.timer) clearTimeout(entry.timer);
     this.controllers.delete(id);

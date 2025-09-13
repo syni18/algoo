@@ -1,31 +1,36 @@
-import { formatBytes } from "@utils/formatBytes.js";
-import { formatTimestamp } from "@utils/formatTimestamp.js";
-import { ExtendedMetricsSnapshot, ServiceMeta } from "interfaces.js";
+import { formatBytes } from '@utils/formatBytes.js';
+import { formatTimestamp } from '@utils/formatTimestamp.js';
+import { ExtendedMetricsSnapshot, ServiceMeta } from 'interfaces.js';
 
-
-export const renderHealthHTML = (
-  snap: ExtendedMetricsSnapshot,
-  meta: ServiceMeta
-): string => {
+export const renderHealthHTML = (snap: ExtendedMetricsSnapshot, meta: ServiceMeta): string => {
   // Helper function to create status badge
   const getStatusBadge = (status: string) => {
-    const statusClass = status.toLowerCase() === 'ok' ? 'status-healthy' :
-      status.toLowerCase() === 'healthy' ? 'status-healthy' : 'status-warning';
+    const statusClass =
+      status.toLowerCase() === 'ok'
+        ? 'status-healthy'
+        : status.toLowerCase() === 'healthy'
+          ? 'status-healthy'
+          : 'status-warning';
     return `<span class="status-badge ${statusClass}">${status.toUpperCase()}</span>`;
   };
 
   // Helper function to format percentage with color coding
   const formatPercentage = (value: number | undefined, threshold = 80, warningThreshold = 60) => {
-    if (value === undefined || value === null) return "N/A";
-    const colorClass = value > threshold ? 'value-warning' :
-      value > warningThreshold ? 'value-caution' : 'value-normal';
+    if (value === undefined || value === null) return 'N/A';
+    const colorClass =
+      value > threshold
+        ? 'value-warning'
+        : value > warningThreshold
+          ? 'value-caution'
+          : 'value-normal';
     return `<span class="${colorClass}">${value.toFixed(2)}%</span>`;
   };
 
   // Helper function to format memory usage with percentage and progress bar
   const formatMemoryUsage = (used: number, total: number) => {
     const percentage = (used / total) * 100;
-    const colorClass = percentage > 80 ? 'value-warning' : percentage > 60 ? 'value-caution' : 'value-normal';
+    const colorClass =
+      percentage > 80 ? 'value-warning' : percentage > 60 ? 'value-caution' : 'value-normal';
     return `
       ${formatBytes(used)} / ${formatBytes(total)} <span class="${colorClass}">(${percentage.toFixed(1)}%)</span>
       <div class="progress-bar">
@@ -51,20 +56,24 @@ export const renderHealthHTML = (
 
   // Helper function to format load average
   const formatLoadAverage = (loadAvg: number[]): string => {
-    return loadAvg.map(load => load.toFixed(2)).join(', ');
+    return loadAvg.map((load) => load.toFixed(2)).join(', ');
   };
 
   // Helper function to parse and format disk usage table
   const formatDiskUsageTable = (diskUsage: string): string => {
-    const lines = diskUsage.split('\n').filter(line => line.trim() && !line.startsWith('Filesystem'));
-    return lines.map(line => {
-      const cols = line.trim().split(/\s+/);
-      if (cols.length >= 6) {
-        const usagePercent = cols[4]?.replace('%', '') || '0';
-        const usageNum = parseInt(usagePercent);
-        const colorClass = usageNum > 80 ? 'value-warning' : usageNum > 60 ? 'value-caution' : 'value-normal';
+    const lines = diskUsage
+      .split('\n')
+      .filter((line) => line.trim() && !line.startsWith('Filesystem'));
+    return lines
+      .map((line) => {
+        const cols = line.trim().split(/\s+/);
+        if (cols.length >= 6) {
+          const usagePercent = cols[4]?.replace('%', '') || '0';
+          const usageNum = parseInt(usagePercent);
+          const colorClass =
+            usageNum > 80 ? 'value-warning' : usageNum > 60 ? 'value-caution' : 'value-normal';
 
-        return `<tr>
+          return `<tr>
           <td><code>${cols[0] || 'N/A'}</code></td>
           <td>${cols[1] || 'N/A'}</td>
           <td>${cols[2] || 'N/A'}</td>
@@ -72,27 +81,27 @@ export const renderHealthHTML = (
           <td><span class="${colorClass}">${cols[4] || 'N/A'}</span></td>
           <td>${cols.slice(5).join(' ') || 'N/A'}</td>
         </tr>`;
-      }
-      return '';
-    }).join('');
+        }
+        return '';
+      })
+      .join('');
   };
 
   // Helper function to parse and format network interfaces
   const formatNetworkInterfaces = (bandwidth: string): string => {
-    const lines = bandwidth.split('\n').filter(line =>
-      line.trim() &&
-      !line.startsWith('Inter-|') &&
-      !line.startsWith(' face')
-    );
+    const lines = bandwidth
+      .split('\n')
+      .filter((line) => line.trim() && !line.startsWith('Inter-|') && !line.startsWith(' face'));
 
-    return lines.map(line => {
-      const parts = line.trim().split(/\s+/);
-      if (parts.length >= 11) {
-        const interfaceName = parts[0]?.replace(':', '') || 'unknown';
-        const rxBytes = parseInt(parts[1]) || 0;
-        const txBytes = parseInt(parts[9]) || 0;
+    return lines
+      .map((line) => {
+        const parts = line.trim().split(/\s+/);
+        if (parts.length >= 11) {
+          const interfaceName = parts[0]?.replace(':', '') || 'unknown';
+          const rxBytes = parseInt(parts[1]) || 0;
+          const txBytes = parseInt(parts[9]) || 0;
 
-        return `<tr>
+          return `<tr>
           <td><code>${interfaceName}</code></td>
           <td>${formatBytes(rxBytes)}</td>
           <td>${parts[2] || '0'}</td>
@@ -101,15 +110,16 @@ export const renderHealthHTML = (
           <td>${parts[10] || '0'}</td>
           <td>${parts[11] || '0'}</td>
         </tr>`;
-      }
-      return '';
-    }).join('');
+        }
+        return '';
+      })
+      .join('');
   };
 
   // Helper function to parse network connections and extract services
   const parseNetworkServices = (connections: string): string => {
     const services = [];
-    const lines = connections.split('\n').filter(line => line.includes('LISTEN'));
+    const lines = connections.split('\n').filter((line) => line.includes('LISTEN'));
 
     for (const line of lines) {
       const parts = line.trim().split(/\s+/);
@@ -131,28 +141,29 @@ export const renderHealthHTML = (
   // Define meaningful column names based on typical disk I/O stats (adjust as needed)
   const COLUMN_NAMES = [
     'Device',
-    'Read IOPS',       // example: I/O operations per second reading
-    'Write IOPS',      // example: I/O operations per second writing
-    'Read MB/s',       // example: MB per second reading
-    'Write MB/s',      // example: MB per second writing
-    'Read Sectors',    // example: number of sectors read
-    'Write Sectors',   // example: number of sectors written
-    'IO Waits'         // example: I/O waits count
+    'Read IOPS', // example: I/O operations per second reading
+    'Write IOPS', // example: I/O operations per second writing
+    'Read MB/s', // example: MB per second reading
+    'Write MB/s', // example: MB per second writing
+    'Read Sectors', // example: number of sectors read
+    'Write Sectors', // example: number of sectors written
+    'IO Waits', // example: I/O waits count
   ];
-
 
   function formatDiskIOStatsToHTMLTable(input: string): string {
     const lines = input.trim().split('\n');
 
-    const headerCells = COLUMN_NAMES.map(name => `<th>${name}</th>`).join('');
+    const headerCells = COLUMN_NAMES.map((name) => `<th>${name}</th>`).join('');
     const headerRow = `<tr>${headerCells}</tr>`;
 
-    const bodyRows = lines.map(line => {
-      const cols = line.trim().split(/\s+/);
-      const filledCols = cols.concat(Array(COLUMN_NAMES.length - cols.length).fill('N/A'));
-      const rowCells = filledCols.map(value => `<td>${value}</td>`).join('');
-      return `<tr>${rowCells}</tr>`;
-    }).join('\n');
+    const bodyRows = lines
+      .map((line) => {
+        const cols = line.trim().split(/\s+/);
+        const filledCols = cols.concat(Array(COLUMN_NAMES.length - cols.length).fill('N/A'));
+        const rowCells = filledCols.map((value) => `<td>${value}</td>`).join('');
+        return `<tr>${rowCells}</tr>`;
+      })
+      .join('\n');
 
     return `
 <table border="1" cellpadding="4" cellspacing="0">
@@ -201,7 +212,7 @@ export const renderHealthHTML = (
             <tr><td>CPU Model</td><td>${snap.cpu.model}</td></tr>
             <tr><td>Architecture</td><td>${snap.cpu.arch}</td></tr>
             <tr><td>Core Count</td><td>${snap.cpu.cores}</td></tr>
-            <tr><td>Current Frequency</td><td>${snap.cpu.frequency?.toFixed(2) || "N/A"} MHz</td></tr>
+            <tr><td>Current Frequency</td><td>${snap.cpu.frequency?.toFixed(2) || 'N/A'} MHz</td></tr>
           </table>
         </div>
         
@@ -212,14 +223,20 @@ export const renderHealthHTML = (
               <td>CPU Usage</td>
               <td>
                 ${formatPercentage(snap.cpu.usage)}
-                ${snap.cpu.usage !== undefined ? `
+                ${
+                  snap.cpu.usage !== undefined
+                    ? `
                 <div class="progress-bar">
                   <div class="progress-fill" style="width: ${snap.cpu.usage}%"></div>
-                </div>` : ''}
+                </div>`
+                    : ''
+                }
               </td>
             </tr>
             <tr><td>Load Average (1m, 5m, 15m)</td><td>${formatLoadAverage(snap.cpu.loadAverage)}</td></tr>
-            ${snap.cpu.temperature ? `
+            ${
+              snap.cpu.temperature
+                ? `
             <tr>
               <td>Temperature</td>
               <td>
@@ -227,7 +244,9 @@ export const renderHealthHTML = (
                   🌡️ <span class="temp-value">${snap.cpu.temperature}°C</span>
                 </span>
               </td>
-            </tr>` : ''}
+            </tr>`
+                : ''
+            }
           </table>
         </div>
       </div>
@@ -254,7 +273,9 @@ export const renderHealthHTML = (
           </table>
         </div>
         
-        ${snap.memory.swapTotal ? `
+        ${
+          snap.memory.swapTotal
+            ? `
         <div class="metric-card">
           <h4>Swap Memory</h4>
           <table class="metrics-table">
@@ -264,7 +285,9 @@ export const renderHealthHTML = (
               <td>${formatMemoryUsage(snap.memory.swapUsed || 0, snap.memory.swapTotal)}</td>
             </tr>
           </table>
-        </div>` : ''}
+        </div>`
+            : ''
+        }
         
         <div class="metric-card">
           <h4>Process Memory Usage</h4>
@@ -289,10 +312,13 @@ export const renderHealthHTML = (
   `;
 
   // Disk Information Section
-  const diskSection = snap.disk ? `
+  const diskSection = snap.disk
+    ? `
     <div class="metrics-section">
       <h3>💾 Storage & Disk I/O</h3>
-      ${snap.disk.usage ? `
+      ${
+        snap.disk.usage
+          ? `
       <div class="metric-card full-width">
         <h4>Disk Usage</h4>
         <table class="data-table">
@@ -310,30 +336,47 @@ export const renderHealthHTML = (
             ${formatDiskUsageTable(snap.disk.usage)}
           </tbody>
         </table>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
       
-      ${snap.disk.ioStats ? `
+      ${
+        snap.disk.ioStats
+          ? `
       <div class="metric-card full-width">
         <h4>Disk I/O Statistics</h4>
           <div class="code-block">${formatDiskIOStatsToHTMLTable(snap.disk.ioStats)}</div>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
 
-      ${snap.disk.mountPoints && snap.disk.mountPoints.length > 0 ? `
+      ${
+        snap.disk.mountPoints && snap.disk.mountPoints.length > 0
+          ? `
       <div class="metric-card full-width">
         <h4>Mount Points (${snap.disk.mountPoints.length} total)</h4>
         <div class="mount-points">
-          ${snap.disk.mountPoints.slice(0, 20).map(mount => `<span class="mount-tag">${mount}</span>`).join('')}
+          ${snap.disk.mountPoints
+            .slice(0, 20)
+            .map((mount) => `<span class="mount-tag">${mount}</span>`)
+            .join('')}
           ${snap.disk.mountPoints.length > 20 ? `<span class="mount-more">... and ${snap.disk.mountPoints.length - 20} more</span>` : ''}
         </div>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
     </div>
-  ` : '<div class="metrics-section"><h3>💾 Storage Information</h3><p class="no-data">Storage information not available</p></div>';
+  `
+    : '<div class="metrics-section"><h3>💾 Storage Information</h3><p class="no-data">Storage information not available</p></div>';
 
   // Network Information Section
-  const networkSection = snap.network ? `
+  const networkSection = snap.network
+    ? `
     <div class="metrics-section">
       <h3>🌐 Network Interfaces</h3>
-      ${snap.network.bandwidth ? `
+      ${
+        snap.network.bandwidth
+          ? `
       <div class="metric-card full-width">
         <h4>Network Interface Statistics</h4>
         <table class="data-table">
@@ -352,9 +395,13 @@ export const renderHealthHTML = (
             ${formatNetworkInterfaces(snap.network.bandwidth)}
           </tbody>
         </table>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
 
-      ${snap.network.connections ? `
+      ${
+        snap.network.connections
+          ? `
       <div class="metric-card full-width">
         <h4>Active Network Services</h4>
         <div class="highlight-metric">
@@ -364,9 +411,12 @@ export const renderHealthHTML = (
           <summary>View All Network Connections</summary>
           <div class="code-block">${snap.network.connections}</div>
         </details>
-      </div>` : ''}
+      </div>`
+          : ''
+      }
     </div>
-  ` : '<div class="metrics-section"><h3>🌐 Network Information</h3><p class="no-data">Network information not available</p></div>';
+  `
+    : '<div class="metrics-section"><h3>🌐 Network Information</h3><p class="no-data">Network information not available</p></div>';
 
   // System Information Section
   const systemSection = `
@@ -386,14 +436,18 @@ export const renderHealthHTML = (
           </table>
         </div>
 
-        ${(snap.gpu || snap.battery || snap.system.users) ? `
+        ${
+          snap.gpu || snap.battery || snap.system.users
+            ? `
         <div class="metric-card">
           <h4>Hardware Status</h4>
           <table class="metrics-table">
             ${snap.gpu?.info ? `<tr><td>GPU</td><td>${snap.gpu.info}</td></tr>` : ''}
             ${snap.gpu?.usage ? `<tr><td>GPU Usage</td><td>${snap.gpu.usage}</td></tr>` : ''}
             ${snap.gpu?.memory ? `<tr><td>GPU Memory</td><td>${snap.gpu.memory}</td></tr>` : ''}
-            ${snap.battery ? `
+            ${
+              snap.battery
+                ? `
             <tr>
               <td>Battery Level</td>
               <td>
@@ -403,12 +457,18 @@ export const renderHealthHTML = (
                   <span style="color: ${snap.battery.status === 'charging' ? '#28a745' : '#6c757d'}; font-weight: 600;">${snap.battery.status}</span>
                 </div>
               </td>
-            </tr>` : ''}
+            </tr>`
+                : ''
+            }
             ${snap.system.users ? `<tr><td>Active Users</td><td>${snap.system.users.join(', ')} (${snap.system.users.length} sessions)</td></tr>` : ''}
           </table>
-        </div>` : ''}
+        </div>`
+            : ''
+        }
 
-        ${snap.security ? `
+        ${
+          snap.security
+            ? `
         <div class="metric-card">
           <h4>Security Status</h4>
           <table class="metrics-table">
@@ -416,42 +476,56 @@ export const renderHealthHTML = (
             ${snap.security.antivirus ? `<tr><td>Antivirus</td><td>${snap.security.antivirus}</td></tr>` : ''}
             ${snap.security.updates ? `<tr><td>Pending Updates</td><td><span class="value-caution">${snap.security.updates} updates available</span></td></tr>` : ''}
           </table>
-        </div>` : ''}
+        </div>`
+            : ''
+        }
       </div>
     </div>
   `;
 
   // Services Section
-  const servicesSection = snap.services ? `
+  const servicesSection = snap.services
+    ? `
     <div class="metrics-section">
       <h3>🛠️ System Services</h3>
       <div class="services-grid">
         <div class="service-card">
           <h4>Running Services (${snap.services.running.length})</h4>
           <div class="service-list">
-            ${snap.services.running.length > 0
-      ? snap.services.running.map(service => `<span class="service-tag running">${service}</span>`).join('')
-      : '<span class="no-services">No running services reported</span>'
-    }
+            ${
+              snap.services.running.length > 0
+                ? snap.services.running
+                    .map((service) => `<span class="service-tag running">${service}</span>`)
+                    .join('')
+                : '<span class="no-services">No running services reported</span>'
+            }
           </div>
         </div>
         
         <div class="service-card">
           <h4>Failed Services (${snap.services.failed.length})</h4>
           <div class="service-list">
-            ${snap.services.failed.length > 0
-      ? snap.services.failed.map(service => `<span class="service-tag failed">${service}</span>`).join('')
-      : '<span class="no-services">No failed services</span>'
-    }
+            ${
+              snap.services.failed.length > 0
+                ? snap.services.failed
+                    .map((service) => `<span class="service-tag failed">${service}</span>`)
+                    .join('')
+                : '<span class="no-services">No failed services</span>'
+            }
           </div>
         </div>
       </div>
-      ${snap.services.running.length === 1 ? `
+      ${
+        snap.services.running.length === 1
+          ? `
       <div class="highlight-metric">
         <strong>Note:</strong> Only one service is explicitly reported as running. Most system services are managed by systemd and may not appear in this simplified view.
-      </div>` : ''}
+      </div>`
+          : ''
+      }
     </div>
-  ` : '<div class="metrics-section"><h3>🛠️ System Services</h3><p class="no-data">Service information not available</p></div>';
+  `
+    : '<div class="metrics-section"><h3>🛠️ System Services</h3><p class="no-data">Service information not available</p></div>';
 
   // Environment Configuration Section
   const environmentSection = `
@@ -1030,4 +1104,4 @@ export const renderHealthHTML = (
       </body>
     </html>
   `;
-}
+};

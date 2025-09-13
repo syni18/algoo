@@ -1,6 +1,6 @@
 import { SensorInfo } from 'interfaces.js';
-import { runCmd } from '../utils/runCmd.js';
 
+import { runCmd } from '../utils/runCmd.js';
 
 // Sensor Information
 export const getSensorInfo = (): SensorInfo | undefined => {
@@ -10,7 +10,7 @@ export const getSensorInfo = (): SensorInfo | undefined => {
     const sensorData = runCmd('sensors 2>/dev/null');
     if (sensorData) {
       const lines = sensorData.split('\n');
-      lines.forEach(line => {
+      lines.forEach((line) => {
         if (line.includes('°C')) {
           const [name, value] = line.split(':');
           const temp = parseFloat(value.match(/(\d+\.\d+)°C/)?.[1] || '0');

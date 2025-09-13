@@ -1,6 +1,7 @@
 // middleware/attachAbortController.ts
-import type { Request, Response, NextFunction } from "express";
-import { abortManager } from "../utils/abort.js";
+import type { NextFunction, Request, Response } from 'express';
+
+import { abortManager } from '../utils/abort.js';
 
 export function attachAbortController(timeoutMs?: number) {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -11,8 +12,8 @@ export function attachAbortController(timeoutMs?: number) {
 
     const cleanup = () => abortManager.abort(id);
 
-    req.on("close", cleanup);
-    res.on("finish", cleanup);
+    req.on('close', cleanup);
+    res.on('finish', cleanup);
 
     next();
   };

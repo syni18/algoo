@@ -10,7 +10,7 @@ class AbortManager {
     const key = id || Math.random().toString(36).slice(2);
     this.controllers.set(key, ctrl);
 
-    ctrl.signal.addEventListener("abort", () => {
+    ctrl.signal.addEventListener('abort', () => {
       this.controllers.delete(key);
     });
 
