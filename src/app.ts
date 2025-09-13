@@ -15,7 +15,7 @@ import toobusy from 'toobusy-js';
 import morganLogger from './logger/morgan-logger.js';
 import { exposeMetricsEndpoint, metricsMiddleware } from './metrics.js';
 import errorHandler from './middlewares/errorHandler.js';
-import { collectMetricsSafely } from 'system/sys.js';
+import { collectMetrics, getLastMetricsSnapshot } from 'system/index.js';
 import logger from 'logger/winston-logger.js';
 import { renderHealthHTML } from 'HTML/healthView.js';
 
@@ -108,13 +108,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.get("/health", (req: Request, res: Response) => {
-  const snap = collectMetricsSafely();
-
-  if (!snap) {
-    return res.status(500).send("<h1>No metrics available</h1>");
-  }
-
+app.get("/health", async (req: Request, res: Response) => {
   const meta = {
     status: "ok",
     service: "algoo-api",
@@ -124,12 +118,29 @@ app.get("/health", (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
   };
 
-  if (req.query.format === "html") {
-    res.send(renderHealthHTML(snap, meta));
-  } else {
-    res.json({ ...meta, metrics: snap });
+  try {
+    let snap = await getLastMetricsSnapshot();
+    logger.info("Serving /health with cached metrics snapshot");
+
+    if (!snap) {
+      logger.info("No cached snapshot, collecting fresh metrics");
+      snap = await collectMetrics();
+    }
+
+    // If no cached snapshot or you want fresh every call:
+    // snap = await collectMetrics();
+
+    if (req.query.format === "html") {
+      // Implement your HTML render function or fallback
+      res.send(renderHealthHTML(snap, meta));
+    } else {
+      res.json({ ...meta, metrics: snap });
+    }
+  } catch (err) {
+    res.status(500).json({ ...meta, status: "error", error: (err as Error).message });
   }
 });
+
 
 app.get('/', (req: Request, res: Response) => {
   res.status(200).json({ message: 'Welcome to the Secure Algoo API!' });
