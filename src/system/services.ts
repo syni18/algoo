@@ -1,5 +1,4 @@
 import { servicesInfo } from '../interfaces.js';
-
 import { runCmd } from '../utils/runCmd.js';
 
 // Services Information

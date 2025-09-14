@@ -1,13 +1,13 @@
 enum ByteSizes {
-  Bytes = "Bytes",
-  KB = "KB",
-  MB = "MB",
-  GB = "GB",
-  TB = "TB",
-  PB = "PB",
-  EB = "EB",
-  ZB = "ZB",
-  YB = "YB"
+  Bytes = 'Bytes',
+  KB = 'KB',
+  MB = 'MB',
+  GB = 'GB',
+  TB = 'TB',
+  PB = 'PB',
+  EB = 'EB',
+  ZB = 'ZB',
+  YB = 'YB',
 }
 
 const k = 1024;

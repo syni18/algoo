@@ -1,22 +1,25 @@
 import { createHash } from 'crypto';
-import { Readable } from 'stream';
 import dotenv from 'dotenv';
+import { Readable } from 'stream';
 
 dotenv.config();
 
 // Hash small string or buffer directly
-export function computeHash(data: string | Buffer, algorithm = process.env.INTEGRITY_ALGORITHM!): string {
+export function computeHash(
+  data: string | Buffer,
+  algorithm = process.env.INTEGRITY_ALGORITHM!,
+): string {
   return createHash(algorithm).update(data).digest('hex');
 }
 
 // Async hash for large data streams (files, network streams)
 export async function computeHashStream(
   stream: Readable,
-  algorithm = process.env.INTEGRITY_ALGORITHM!
+  algorithm = process.env.INTEGRITY_ALGORITHM!,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const hash = createHash(algorithm);
-    stream.on('data', chunk => hash.update(chunk));
+    stream.on('data', (chunk) => hash.update(chunk));
     stream.on('error', reject);
     stream.on('end', () => resolve(hash.digest('hex')));
   });

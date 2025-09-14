@@ -8,15 +8,15 @@ const consoleFormat = winston.format.combine(
     ({ timestamp, level, message, ...meta }) =>
       `${timestamp} ${level}: ${message}${
         Object.keys(meta).length ? ' ' + JSON.stringify(meta) : ''
-      }`
-  )
+      }`,
+  ),
 );
 
 // JSON format (for files or log systems)
 const jsonFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.errors({ stack: true }),
-  winston.format.json()
+  winston.format.json(),
 );
 
 const logger = winston.createLogger({

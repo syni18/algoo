@@ -1,5 +1,4 @@
 import { DiskInfo } from '../interfaces.js';
-
 import { runCmd } from '../utils/runCmd.js';
 
 // Disk Information

@@ -1,5 +1,4 @@
 import { GpuInfo } from '../interfaces.js';
-
 import { runCmd } from '../utils/runCmd.js';
 
 // GPU Information

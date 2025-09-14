@@ -1,7 +1,7 @@
-import logger from '../logger/winston-logger.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import logger from '../logger/winston-logger.js';
 import { WorkerPool } from '../utils/workerThread.js'; // Import the scalable WorkerPool class
 
 const __filename = fileURLToPath(import.meta.url);

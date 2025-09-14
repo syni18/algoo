@@ -1,5 +1,4 @@
 import { SensorInfo } from '../interfaces.js';
-
 import { runCmd } from '../utils/runCmd.js';
 
 // Sensor Information

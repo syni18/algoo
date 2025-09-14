@@ -1,6 +1,6 @@
-import { SystemMetricsSnapshot, WorkerMessage } from '../interfaces.js';
 import { parentPort } from 'worker_threads';
 
+import { SystemMetricsSnapshot, WorkerMessage } from '../interfaces.js';
 import logger from '../logger/winston-logger.js';
 import * as battery from './battery.js';
 import * as cpu from './cpu.js';

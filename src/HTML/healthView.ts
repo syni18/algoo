@@ -1,6 +1,6 @@
+import { ExtendedMetricsSnapshot, ServiceMeta } from '../interfaces.js';
 import { formatBytes } from '../utils/formatBytes.js';
 import { timestampFormatGmt } from '../utils/timestamp-format.js';
-import { ExtendedMetricsSnapshot, ServiceMeta } from '../interfaces.js';
 
 export const renderHealthHTML = (snap: ExtendedMetricsSnapshot, meta: ServiceMeta): string => {
   // Helper function to create status badge

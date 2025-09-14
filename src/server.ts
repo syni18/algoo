@@ -10,10 +10,10 @@ register('ts-node/esm', pathToFileURL('./'));
 
 import fs from 'fs';
 import https from 'https';
-import { shutdownMetricsPool, startPeriodicMetricsRefresh } from './system/index.js';
 
 import app from './app.js';
 import logger from './logger/winston-logger.js';
+import { shutdownMetricsPool, startPeriodicMetricsRefresh } from './system/index.js';
 import gracefulShutdown from './utils/gracefulShutdown.js';
 import { closeWebSocketServer, setupWebSocketServer } from './wss.js';
 

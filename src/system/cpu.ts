@@ -1,6 +1,6 @@
-import { CpuInfo } from '../interfaces.js';
 import os from 'os';
 
+import { CpuInfo } from '../interfaces.js';
 import { readFile } from '../utils/readFile.js';
 import { runCmd } from '../utils/runCmd.js';
 

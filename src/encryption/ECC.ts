@@ -1,9 +1,4 @@
-import {
-  createECDH,
-  createCipheriv,
-  createDecipheriv,
-  randomBytes,
-} from "crypto";
+import { createCipheriv, createDecipheriv, createECDH, randomBytes } from 'crypto';
 
 const CURVE = process.env.ECC_CURVE!;
 const AES_ALGO = process.env.AES_ALGORITHM_CBC!;
@@ -14,8 +9,8 @@ export function generateReceiverKeys() {
   receiverECDH.generateKeys();
 
   return {
-    publicKey: receiverECDH.getPublicKey("base64"),
-    privateKey: receiverECDH.getPrivateKey("base64"), // ⚠️ store securely
+    publicKey: receiverECDH.getPublicKey('base64'),
+    privateKey: receiverECDH.getPrivateKey('base64'), // ⚠️ store securely
   };
 }
 
@@ -25,22 +20,20 @@ export function ECCencryptMessage(message: string, receiverPublicKeyBase64: stri
   senderECDH.generateKeys();
 
   // derive shared secret
-  const sharedSecret = senderECDH.computeSecret(
-    Buffer.from(receiverPublicKeyBase64, "base64")
-  );
+  const sharedSecret = senderECDH.computeSecret(Buffer.from(receiverPublicKeyBase64, 'base64'));
   const aesKey = sharedSecret.subarray(0, 32);
 
   // encrypt with AES
   const iv = randomBytes(16);
   const cipher = createCipheriv(AES_ALGO, aesKey, iv);
 
-  let encrypted = cipher.update(message, "utf8", "base64");
-  encrypted += cipher.final("base64");
+  let encrypted = cipher.update(message, 'utf8', 'base64');
+  encrypted += cipher.final('base64');
 
   return {
     encrypted,
-    iv: iv.toString("base64"),
-    senderPublicKey: senderECDH.getPublicKey("base64"),
+    iv: iv.toString('base64'),
+    senderPublicKey: senderECDH.getPublicKey('base64'),
   };
 }
 
@@ -49,25 +42,22 @@ export function ECCdecryptMessage(
   encrypted: string,
   ivBase64: string,
   senderPublicKeyBase64: string,
-  receiverPrivateKeyBase64: string
+  receiverPrivateKeyBase64: string,
 ) {
   const receiverECDH = createECDH(CURVE);
-  receiverECDH.setPrivateKey(Buffer.from(receiverPrivateKeyBase64, "base64"));
+  receiverECDH.setPrivateKey(Buffer.from(receiverPrivateKeyBase64, 'base64'));
 
-  const sharedSecret = receiverECDH.computeSecret(
-    Buffer.from(senderPublicKeyBase64, "base64")
-  );
+  const sharedSecret = receiverECDH.computeSecret(Buffer.from(senderPublicKeyBase64, 'base64'));
   const aesKey = sharedSecret.subarray(0, 32);
 
-  const iv = Buffer.from(ivBase64, "base64");
+  const iv = Buffer.from(ivBase64, 'base64');
   const decipher = createDecipheriv(AES_ALGO, aesKey, iv);
 
-  let decrypted = decipher.update(encrypted, "base64", "utf8");
-  decrypted += decipher.final("utf8");
+  let decrypted = decipher.update(encrypted, 'base64', 'utf8');
+  decrypted += decipher.final('utf8');
 
   return decrypted;
 }
-
 
 // --- IGNORE ---
 // Step 1: Receiver creates persistent keys (done once)

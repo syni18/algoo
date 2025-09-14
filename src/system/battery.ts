@@ -1,5 +1,4 @@
 import { BatteryInfo } from '../interfaces.js';
-
 import { readFile } from '../utils/readFile.js';
 import { runCmd } from '../utils/runCmd.js';
 

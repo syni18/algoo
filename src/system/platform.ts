@@ -1,6 +1,6 @@
-import { SystemInfo } from '../interfaces.js';
 import os from 'os';
 
+import { SystemInfo } from '../interfaces.js';
 import { runCmd } from '../utils/runCmd.js';
 
 // System Information

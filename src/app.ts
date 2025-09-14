@@ -7,18 +7,18 @@ import express, { Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import fs from 'fs';
 import helmet from 'helmet';
-import { renderHealthHTML } from './HTML/healthView.js';
-import logger from './logger/winston-logger.js';
 import morgan from 'morgan';
 import path from 'path';
-import { collectMetrics, getLastMetricsSnapshot } from './system/index.js';
 import toobusy from 'toobusy-js';
 
+import { renderHealthHTML } from './HTML/healthView.js';
 // Custom modules
 import morganLogger from './logger/morgan-logger.js';
+import logger from './logger/winston-logger.js';
 import { exposeMetricsEndpoint, metricsMiddleware } from './metrics.js';
 import errorHandler from './middlewares/errorHandler.js';
 import { httpRoutes } from './routes/index.js';
+import { collectMetrics, getLastMetricsSnapshot } from './system/index.js';
 
 const app = express();
 
