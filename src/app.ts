@@ -7,11 +7,11 @@ import express, { Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import fs from 'fs';
 import helmet from 'helmet';
-import { renderHealthHTML } from 'HTML/healthView.js';
-import logger from 'logger/winston-logger.js';
+import { renderHealthHTML } from './HTML/healthView.js';
+import logger from './logger/winston-logger.js';
 import morgan from 'morgan';
 import path from 'path';
-import { collectMetrics, getLastMetricsSnapshot } from 'system/index.js';
+import { collectMetrics, getLastMetricsSnapshot } from './system/index.js';
 import toobusy from 'toobusy-js';
 
 // Custom modules

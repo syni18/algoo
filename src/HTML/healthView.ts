@@ -1,6 +1,6 @@
-import { formatBytes } from '@utils/formatBytes.js';
-import { formatTimestamp } from '@utils/formatTimestamp.js';
-import { ExtendedMetricsSnapshot, ServiceMeta } from 'interfaces.js';
+import { formatBytes } from '../utils/formatBytes.js';
+import { timestampFormatGmt } from '../utils/timestamp-format.js';
+import { ExtendedMetricsSnapshot, ServiceMeta } from '../interfaces.js';
 
 export const renderHealthHTML = (snap: ExtendedMetricsSnapshot, meta: ServiceMeta): string => {
   // Helper function to create status badge
@@ -183,7 +183,7 @@ export const renderHealthHTML = (snap: ExtendedMetricsSnapshot, meta: ServiceMet
           <tr><td>Version</td><td>${meta.version}</td></tr>
           <tr><td>Environment</td><td><span class="env-badge">${meta.environment.toUpperCase()}</span></td></tr>
           <tr><td>Uptime</td><td>${meta.uptime}</td></tr>
-          <tr><td>Report Time</td><td>${formatTimestamp(snap.ts)}</td></tr>
+          <tr><td>Report Time</td><td>${timestampFormatGmt(snap.ts)}</td></tr>
         </table>
       </div>
       
@@ -432,7 +432,7 @@ export const renderHealthHTML = (snap: ExtendedMetricsSnapshot, meta: ServiceMet
             <tr><td>Kernel Version</td><td>${snap.system.kernel || snap.system.release}</td></tr>
             <tr><td>OS Version</td><td>${snap.system.version}</td></tr>
             <tr><td>System Uptime</td><td>${formatUptime(snap.system.uptime)}</td></tr>
-            ${snap.system.lastBoot ? `<tr><td>Last Boot</td><td>${formatTimestamp(snap.system.lastBoot)}</td></tr>` : ''}
+            ${snap.system.lastBoot ? `<tr><td>Last Boot</td><td>${timestampFormatGmt(snap.system.lastBoot)}</td></tr>` : ''}
           </table>
         </div>
 
@@ -1098,7 +1098,7 @@ export const renderHealthHTML = (snap: ExtendedMetricsSnapshot, meta: ServiceMet
           </div>
 
           <div class="footer">
-            <p>Generated on ${formatTimestamp(snap.ts)} • ${meta.service} Health Monitoring System</p>
+            <p>Generated on ${timestampFormatGmt(snap.ts)} • ${meta.service} Health Monitoring System</p>
           </div>
         </div>
       </body>

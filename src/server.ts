@@ -2,15 +2,15 @@
 import { register } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
-import { checkInfluxConnection } from '@config/influxDB.js';
-import { checkDatabaseConnections } from '@config/postgres.js';
-import { checkRedisConnection } from '@config/redis.js';
+import { checkInfluxConnection } from './config/influxDB.js';
+import { checkDatabaseConnections } from './config/postgres.js';
+import { checkRedisConnection } from './config/redis.js';
 
 register('ts-node/esm', pathToFileURL('./'));
 
 import fs from 'fs';
 import https from 'https';
-import { shutdownMetricsPool } from 'system/index.js';
+import { shutdownMetricsPool } from './system/index.js';
 
 import app from './app.js';
 import logger from './logger/winston-logger.js';

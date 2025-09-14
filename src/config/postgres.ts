@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import logger from 'logger/winston-logger';
+import logger from '../logger/winston-logger.js';
 import CircuitBreaker from 'opossum';
 import { Pool } from 'pg';
 dotenv.config();

@@ -1,10 +1,25 @@
+enum ByteSizes {
+  Bytes = "Bytes",
+  KB = "KB",
+  MB = "MB",
+  GB = "GB",
+  TB = "TB",
+  PB = "PB",
+  EB = "EB",
+  ZB = "ZB",
+  YB = "YB"
+}
+
+const k = 1024;
+const logK = Math.log(k);
+
 export const formatBytes = (bytes: number, decimals = 2): string => {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes < 1) return `0 ${ByteSizes.Bytes}`;
 
-  const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const sizeUnits = Object.values(ByteSizes);
+  const i = Math.min(Math.floor(Math.log(bytes) / logK), sizeUnits.length - 1);
+  const value = (bytes / Math.pow(k, i)).toFixed(dm);
 
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  return `${value} ${sizeUnits[i]}`;
 };

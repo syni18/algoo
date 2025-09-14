@@ -1,6 +1,7 @@
 // src/config/influx.ts
 import { InfluxDB } from '@influxdata/influxdb-client';
-
+import dotenv from 'dotenv';
+dotenv.config();
 import logger from '../logger/winston-logger.js';
 
 const url = process.env.INFLUX_URL!;

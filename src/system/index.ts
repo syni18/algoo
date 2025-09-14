@@ -1,4 +1,4 @@
-import logger from 'logger/winston-logger.js';
+import logger from '../logger/winston-logger.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 

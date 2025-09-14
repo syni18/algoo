@@ -1,7 +1,7 @@
 import type { IncomingMessage } from 'http';
 import { Server as HTTPServer } from 'http';
 import { Server as HTTPSServer } from 'https';
-import { routeConnection } from 'routes/index.js';
+import { routeConnection } from './routes/index.js';
 import type { TLSSocket } from 'tls';
 import url from 'url';
 import { WebSocketServer } from 'ws';
