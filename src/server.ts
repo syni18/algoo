@@ -10,7 +10,7 @@ register('ts-node/esm', pathToFileURL('./'));
 
 import fs from 'fs';
 import https from 'https';
-import { shutdownMetricsPool } from './system/index.js';
+import { shutdownMetricsPool, startPeriodicMetricsRefresh } from './system/index.js';
 
 import app from './app.js';
 import logger from './logger/winston-logger.js';
@@ -76,6 +76,9 @@ if (sslKeyPath && sslCertPath && fs.existsSync(sslKeyPath) && fs.existsSync(sslC
 
 // Setup WebSocket Server
 setupWebSocketServer(server);
+
+// Initially collect metrics
+startPeriodicMetricsRefresh();
 
 // Cleanup logic for graceful shutdown
 const cleanup = async () => {

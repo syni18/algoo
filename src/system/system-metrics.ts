@@ -49,7 +49,7 @@ export function collectExtendedMetrics(): SystemMetricsSnapshot {
 
 if (parentPort) {
   parentPort.on('message', (message: WorkerMessage) => {
-    logger.debug(`Worker received message: ${JSON.stringify(message)}`);
+    logger.debug(`Worker received message: `, message);
     if (parentPort) {
       if (message?.type === 'collect-metrics') {
         if (parentPort) {

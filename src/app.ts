@@ -60,6 +60,8 @@ app.use(
 );
 app.disable('x-powered-by');
 
+// app.use(slownessMiddleware);
+
 // Metrics
 app.use(metricsMiddleware);
 
