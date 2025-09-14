@@ -1,4 +1,4 @@
-import { SystemMetricsSnapshot, WorkerMessage } from 'interfaces.js';
+import { SystemMetricsSnapshot, WorkerMessage } from '../interfaces.js';
 import { parentPort } from 'worker_threads';
 
 import logger from '../logger/winston-logger.js';

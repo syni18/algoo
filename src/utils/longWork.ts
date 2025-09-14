@@ -1,4 +1,4 @@
-import logger from 'logger/winston-logger';
+import logger from '../logger/winston-logger.js';
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise<void>((resolve, reject) => {

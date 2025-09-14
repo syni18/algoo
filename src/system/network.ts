@@ -1,4 +1,4 @@
-import { NetworkInfo } from 'interfaces.js';
+import { NetworkInfo } from '../interfaces.js';
 
 import { runCmd } from '../utils/runCmd.js';
 

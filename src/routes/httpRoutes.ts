@@ -1,5 +1,5 @@
 // src/routes/httpRoutes.ts
-import longRunningWork from '@utils/longWork.js';
+import longRunningWork from '../utils/longWork.js';
 import { Router } from 'express';
 
 import { attachAbortController } from '../middlewares/attachAbortController.js';

@@ -1,4 +1,4 @@
-import { MemoryInfo } from 'interfaces.js';
+import { MemoryInfo } from '../interfaces.js';
 import os from 'os';
 
 import { readFile } from '../utils/readFile.js';

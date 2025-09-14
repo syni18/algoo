@@ -1,4 +1,4 @@
-import { SecurityInfo } from 'interfaces.js';
+import { SecurityInfo } from '../interfaces.js';
 
 import { runCmd } from '../utils/runCmd.js';
 

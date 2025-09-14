@@ -1,4 +1,4 @@
-import { servicesInfo } from 'interfaces.js';
+import { servicesInfo } from '../interfaces.js';
 
 import { runCmd } from '../utils/runCmd.js';
 

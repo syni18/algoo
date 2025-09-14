@@ -1,4 +1,4 @@
-import logger from 'logger/winston-logger.js';
+import logger from '../logger/winston-logger.js';
 import type { WebSocket } from 'ws';
 
 import { chatService } from '../services/ws_chats.js';

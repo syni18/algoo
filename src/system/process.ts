@@ -1,4 +1,4 @@
-import { ProcessInfo } from 'interfaces';
+import { ProcessInfo } from '../interfaces.js';
 
 export const getProcessInfo = (): ProcessInfo => {
   return {
