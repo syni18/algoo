@@ -8,7 +8,7 @@ import unusedImports from "eslint-plugin-unused-imports";
 
 export default [
   {
-    ignores: ["dist", "node_modules", "*.js"], // replaces .eslintignore
+    ignores: ["dist", "node_modules", "*.js", "*.cjs"], // ✅ now ignores PM2 config
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

@@ -1,3 +1,4 @@
+import { ExtendedMetricsSnapshot } from 'interfaces.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -24,7 +25,7 @@ const metricsWorkerPool = new WorkerPool(
 let lastMetricsSnapshot: any = null;
 
 // Function to request metrics collection from worker pool
-export async function collectMetrics(): Promise<any> {
+export async function collectMetrics(): Promise<ExtendedMetricsSnapshot | null> {
   try {
     const metrics = await metricsWorkerPool.runJob(
       { type: 'collect-metrics' },
@@ -39,7 +40,7 @@ export async function collectMetrics(): Promise<any> {
 }
 
 // Function to get the latest cached metrics
-export function getLastMetricsSnapshot(): any {
+export function getLastMetricsSnapshot(): ExtendedMetricsSnapshot | null {
   return lastMetricsSnapshot;
 }
 

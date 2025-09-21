@@ -9,6 +9,10 @@ import fs from 'fs';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
+import type { Metric } from 'prom-client';
+import * as promClient from 'prom-client';
+import { sqlInjectionDetectorAdvanced } from 'security/SQLInjection.js';
+import compression from 'compression';
 import toobusy from 'toobusy-js';
 
 import { renderHealthHTML } from './HTML/healthView.js';
@@ -58,6 +62,19 @@ app.use(
     preload: true,
   }),
 );
+
+app.use(
+  compression({
+    level: 6, // balance between speed and CPU
+    threshold: 1024, // skip small payloads
+    filter: (req: Request, res: Response) => {
+      const type = res.getHeader("Content-Type") || "";
+      if (!String(type).match(/json|text|javascript|css|html/)) return false;
+      return compression.filter(req, res);
+    }
+  })
+);
+
 app.disable('x-powered-by');
 
 // app.use(slownessMiddleware);
@@ -102,11 +119,42 @@ const corsOptions: CorsOptionsDelegate = (req, callback) => {
     callback(new Error('Not allowed by CORS'), { origin: false });
   }
 };
+
+// optional Prometheus metrics client wrapper
+const metricsClient = {
+  incr: (name: string, labels?: Record<string, string | number>) => {
+    const metric: Metric<string> | undefined = promClient.register.getSingleMetric(name);
+
+    if (metric && 'inc' in metric && typeof metric.inc === 'function') {
+      return metric.inc(labels ?? {});
+    }
+    return undefined;
+  },
+};
+
+// make store multi-instance ready by passing a Redis-backed store (not included here)
+const detector = sqlInjectionDetectorAdvanced({
+  block: false, // start with false while tuning
+  alertThreshold: 30,
+  blockThreshold: 75,
+  throttle: { windowMs: 60_000, maxHits: 12, blockDurationMs: 5 * 60_000 },
+  metrics: metricsClient,
+  alertHook: (ctx) => {
+    logger.info(`Alert Hook: IP ${ctx.ip} Score ${ctx.score} Reason: ${ctx.reason}`);
+  },
+  blockHook: (ctx) => {
+    logger.info(`Block Hook: IP ${ctx.ip} Score: ${ctx.score}`);
+  },
+  logger: console,
+});
+
 app.use(cors(corsOptions));
 
 // Body Parsers
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+app.use(detector);
 
 // Routes
 app.get('/health', async (req: Request, res: Response) => {
@@ -120,7 +168,7 @@ app.get('/health', async (req: Request, res: Response) => {
   };
 
   try {
-    let snap = await getLastMetricsSnapshot();
+    let snap = getLastMetricsSnapshot();
     logger.info('Serving /health with cached metrics snapshot');
 
     if (!snap) {
@@ -133,7 +181,7 @@ app.get('/health', async (req: Request, res: Response) => {
 
     if (req.query.format === 'html') {
       // Implement your HTML render function or fallback
-      res.send(renderHealthHTML(snap, meta));
+      res.send(renderHealthHTML(snap!, meta));
     } else {
       res.json({ ...meta, metrics: snap });
     }

@@ -15,12 +15,15 @@ const queryApi = influxDB.getQueryApi(org);
 
 writeApi.useDefaultTags({ host: 'host' });
 
-/**
- * ✅ Check InfluxDB connection on startup
- */
+interface InfluxHealth {
+  name: string;
+  message: string;
+  status: 'pass' | 'fail';
+  checks?: unknown[];
+}
+
 export async function checkInfluxConnection(): Promise<void> {
   try {
-    // The /health endpoint is simpler than running a query
     const response = await fetch(`${url}/health`, {
       headers: { Authorization: `Token ${token}` },
     });
@@ -29,11 +32,25 @@ export async function checkInfluxConnection(): Promise<void> {
       throw new Error(`InfluxDB health check failed: ${response.statusText}`);
     }
 
-    const health = await response.json();
-    if (health.status === 'pass') {
-      logger.info('✅ InfluxDB connection successful.');
+    // Runtime validation
+    const raw: unknown = await response.json();
+
+    if (
+      (typeof raw === 'object' &&
+        raw !== null &&
+        'status' in raw &&
+        (raw as Record<string, unknown>).status === 'pass') ||
+      (raw as Record<string, unknown>).status === 'fail'
+    ) {
+      const health: InfluxHealth = raw as InfluxHealth;
+
+      if (health.status === 'pass') {
+        logger.info('✅ InfluxDB connection successful.');
+      } else {
+        logger.warn('⚠️ InfluxDB health check returned:', health);
+      }
     } else {
-      logger.warn('⚠️ InfluxDB health check returned:', health);
+      logger.error('❌ InfluxDB health check returned unexpected format:', raw);
     }
   } catch (error) {
     logger.error('❌ Error checking InfluxDB connection:', error);
