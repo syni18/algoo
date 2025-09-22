@@ -16,10 +16,16 @@ const METRICS_REFRESH_INTERVAL_MS = process.env.METRICS_REFRESH_INTERVAL_MS
 let refreshIntervalId: NodeJS.Timeout | null = null;
 
 // Initialize worker pool with 2 workers (adjust size based on load)
+const isDist = __dirname.includes(path.sep + 'dist' + path.sep) || __dirname.endsWith(path.sep + 'dist');
+const ext = isDist ? '.js' : '.ts';
+
+const metricsWorkerPath = path.resolve(__dirname, `./system-metrics${ext}`);
+
 const metricsWorkerPool = new WorkerPool(
-  path.resolve(__dirname, './system-metrics.ts'),
+  metricsWorkerPath,
   Number(process.env.WORKERPOOL_SIZE),
 );
+
 
 // Cached last metrics snapshot
 let lastMetricsSnapshot: any = null;

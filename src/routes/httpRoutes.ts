@@ -1,17 +1,31 @@
 // src/routes/httpRoutes.ts
+import { sendResponse } from '../utils/sendResponse.js';
 import { Router } from 'express';
 
 import { attachAbortController } from '../middlewares/attachAbortController.js';
 import longRunningWork from '../utils/longWork.js';
+import health from './v1-API/health.js';
 const router = Router();
 
 router.get('/', (req, res) => {
-  res.json({ message: 'API Root Working' });
+  return sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    data: null,
+    message: 'Root API is running',
+    meta: {},
+  });
 });
 
-router.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+// Array of all routes
+const routeModules = [health];
+
+routeModules.forEach((mod) => {
+  router.use(mod.basePath, mod.router);
 });
+
+export default router;
 
 router.get('/long-task', attachAbortController(200), async (req, res) => {
   const signal = req.abortController!.signal;
@@ -49,5 +63,3 @@ router.get('/stream-task', attachAbortController(200), async (req, res) => {
     }
   }
 });
-
-export default router;

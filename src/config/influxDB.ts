@@ -1,17 +1,23 @@
 // src/config/influx.ts
-import { InfluxDB } from '@influxdata/influxdb-client';
 import dotenv from 'dotenv';
 dotenv.config();
+import { InfluxDB } from '@influxdata/influxdb-client';
+
 import logger from '../logger/winston-logger.js';
 
-const url = process.env.INFLUX_URL!;
-const token = process.env.INFLUX_TOKEN!;
-const org = process.env.INFLUX_ORG!;
-const bucket = process.env.INFLUX_BUCKET!;
+const INFLUX_URL = process.env.INFLUX_URL;
+const INFLUX_TOKEN = process.env.INFLUX_TOKEN;
+const INFLUX_ORG = process.env.INFLUX_ORG;
+const INFLUX_BUCKET = process.env.INFLUX_BUCKET;
 
-const influxDB = new InfluxDB({ url, token });
-const writeApi = influxDB.getWriteApi(org, bucket, 'ns');
-const queryApi = influxDB.getQueryApi(org);
+if (!INFLUX_URL || !INFLUX_TOKEN || !INFLUX_ORG || !INFLUX_BUCKET) {
+  logger.error('❌ InfluxDB configuration is missing. Please set INFLUX_URL, INFLUX_TOKEN, INFLUX_ORG, and INFLUX_BUCKET environment variables.');
+  process.exit(1);
+}
+
+const influxDB = new InfluxDB({ url: INFLUX_URL, token: INFLUX_TOKEN });
+const writeApi = influxDB.getWriteApi(INFLUX_ORG, INFLUX_BUCKET, 'ns');
+const queryApi = influxDB.getQueryApi(INFLUX_ORG);
 
 writeApi.useDefaultTags({ host: 'host' });
 
@@ -24,8 +30,8 @@ interface InfluxHealth {
 
 export async function checkInfluxConnection(): Promise<void> {
   try {
-    const response = await fetch(`${url}/health`, {
-      headers: { Authorization: `Token ${token}` },
+    const response = await fetch(`${INFLUX_URL}/health`, {
+      headers: { Authorization: `Token ${INFLUX_TOKEN}` },
     });
 
     if (!response.ok) {

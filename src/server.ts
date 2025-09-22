@@ -1,4 +1,6 @@
 // src/server.ts
+import dotenv from 'dotenv';
+dotenv.config();
 import { register } from 'node:module';
 import { pathToFileURL } from 'node:url';
 

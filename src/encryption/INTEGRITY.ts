@@ -1,8 +1,5 @@
 import { createHash } from 'crypto';
-import dotenv from 'dotenv';
 import { Readable } from 'stream';
-
-dotenv.config();
 
 // Hash small string or buffer directly
 export function computeHash(

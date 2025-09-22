@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2021",
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "outDir": "./dist",
     "rootDir": "./",
     "strict": true,
@@ -10,9 +10,13 @@
     "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
+    "experimentalDecorators": true,           // Enable decorators
+    "strictPropertyInitialization": false, // Disable strict property initialization checks
+    "emitDecoratorMetadata": true,          // Emit metadata for decorators
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "sourceMap": true,
+    "allowJs": true,
     "baseUrl": "./src",
     "paths": {
       "@controllers/*": [

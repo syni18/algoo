@@ -1,6 +1,9 @@
-// webpack.config.ts
 import path from 'path';
+import { fileURLToPath } from 'url';
 import type { Configuration } from 'webpack';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const config: Configuration = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
@@ -9,7 +12,7 @@ const config: Configuration = {
   output: {
     filename: 'server.js',
     path: path.resolve(__dirname, 'dist'),
-    clean: true, // Clean the output directory before emit
+    clean: true,
   },
   resolve: {
     extensions: ['.ts', '.js'],
@@ -25,9 +28,9 @@ const config: Configuration = {
   },
   devtool: process.env.NODE_ENV === 'production' ? false : 'inline-source-map',
   optimization: {
-    minimize: false, // Typically backend code is not minimized
+    minimize: false,
   },
-  externalsPresets: { node: true }, // Leave Node.js built-ins external
+  externalsPresets: { node: true },
 };
 
 export default config;

@@ -1,4 +1,6 @@
 // src/middleware/errorHandler.ts
+import { sendResponse } from '../utils/sendResponse.js';
+import { timestampFormatGmt } from '../utils/timestamp-format.js';
 import { NextFunction, Request, Response } from 'express';
 
 import { HttpError } from '../errors/HttpError.js';
@@ -24,8 +26,13 @@ const errorHandler = (err: Error | HttpError, req: Request, res: Response, _next
     logger.error(err.stack ?? '');
   }
 
-  // Hide stack trace in production, show only in development
-  const responseBody: { error: string; stack?: string } = { error: message };
+  // Add stack trace in development
+  const meta: Record<string, any> = {
+    timestamp: timestampFormatGmt(new Date()),
+    path: req.originalUrl,
+    method: req.method,
+  };
+
   if (
     process.env.NODE_ENV !== 'production' &&
     err &&
@@ -33,10 +40,18 @@ const errorHandler = (err: Error | HttpError, req: Request, res: Response, _next
     'stack' in err &&
     typeof (err as { stack?: unknown }).stack === 'string'
   ) {
-    responseBody.stack = (err as { stack: string }).stack;
+    meta.stack = (err as { stack: string }).stack;
   }
 
-  res.status(statusCode).json(responseBody);
+  // ✅ Use sendResponse for consistency
+  return sendResponse({
+    res,
+    statusCode,
+    success: false,
+    message,
+    data: null,
+    meta,
+  });
 };
 
 export default errorHandler;

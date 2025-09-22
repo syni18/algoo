@@ -1,7 +1,5 @@
 // src/app.ts
-import dotenv from 'dotenv';
-dotenv.config();
-
+import compression from 'compression';
 import cors, { CorsOptionsDelegate } from 'cors';
 import express, { Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
@@ -11,8 +9,7 @@ import morgan from 'morgan';
 import path from 'path';
 import type { Metric } from 'prom-client';
 import * as promClient from 'prom-client';
-import { sqlInjectionDetectorAdvanced } from 'security/SQLInjection.js';
-import compression from 'compression';
+import { sqlInjectionDetectorAdvanced } from './security/SQLInjection.js';
 import toobusy from 'toobusy-js';
 
 import { renderHealthHTML } from './HTML/healthView.js';
@@ -68,11 +65,11 @@ app.use(
     level: 6, // balance between speed and CPU
     threshold: 1024, // skip small payloads
     filter: (req: Request, res: Response) => {
-      const type = res.getHeader("Content-Type") || "";
+      const type = res.getHeader('Content-Type') || '';
       if (!String(type).match(/json|text|javascript|css|html/)) return false;
       return compression.filter(req, res);
-    }
-  })
+    },
+  }),
 );
 
 app.disable('x-powered-by');

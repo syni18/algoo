@@ -6,7 +6,7 @@ import url from 'url';
 import { WebSocketServer } from 'ws';
 
 import logger from './logger/winston-logger.js';
-import { routeConnection } from './routes/index.js';
+import { wsRoutes } from './routes/index.js';
 
 type ServerType = HTTPServer | HTTPSServer;
 
@@ -99,7 +99,7 @@ export function setupWebSocketServer(server: ServerType) {
     }
 
     // Route connection based on pathname
-    routeConnection(parsedUrl.pathname ?? '/', ws);
+    wsRoutes(parsedUrl.pathname ?? '/', ws);
 
     ws.on('message', (message: string | Buffer) => {
       const msgToLog = typeof message === 'string' ? message : message.toString('utf-8');

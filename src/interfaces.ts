@@ -1,3 +1,5 @@
+import { NextFunction, Request, Response } from 'express';
+
 export interface CPUMetrics {
   cores: number;
   model: string;
@@ -235,4 +237,13 @@ export interface SystemMetricsSnapshot {
   };
   services?: ServicesMetrics;
   security?: SecurityMetrics;
+}
+
+// src/routes/route.interface.ts
+export interface Route {
+  method: 'get' | 'post' | 'put' | 'delete';
+  path: string;
+  handler: (req: Request, res: Response, next: NextFunction) => any; // <-- fixed
+  middleware?: Array<(req: Request, res: Response, next: NextFunction) => void>;
+  validationSchema?: any;
 }

@@ -1,6 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 import cors, { CorsOptionsDelegate } from 'cors';
 import express, { Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
