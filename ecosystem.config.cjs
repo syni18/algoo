@@ -3,7 +3,7 @@ module.exports = {
     apps: [
       {
         name: 'algoo',
-        script: './dist/server.js',
+        script: './dist/src/server.js',
         instances: 1,
         exec_mode: 'fork',
         watch: false,

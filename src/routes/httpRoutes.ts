@@ -1,10 +1,10 @@
 // src/routes/httpRoutes.ts
-import { sendResponse } from '../utils/sendResponse.js';
 import { Router } from 'express';
 
-import { attachAbortController } from '../middlewares/attachAbortController.js';
-import longRunningWork from '../utils/longWork.js';
-import health from './v1-API/health.js';
+import { attachAbortController } from '../middlewares/attachAbortController';
+import longRunningWork from '../utils/longWork';
+import { sendResponse } from '../utils/sendResponse';
+import health from './v1-API/health';
 const router = Router();
 
 router.get('/', (req, res) => {

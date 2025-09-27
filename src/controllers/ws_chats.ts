@@ -1,7 +1,7 @@
 import type { WebSocket } from 'ws';
 
-import logger from '../logger/winston-logger.js';
-import { chatService } from '../services/ws_chats.js';
+import logger from '../logger/winston-logger';
+import { chatService } from '../services/ws_chats';
 
 export function chatController(ws: WebSocket) {
   ws.send('Connected to chat');

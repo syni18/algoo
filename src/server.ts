@@ -4,20 +4,20 @@ dotenv.config();
 import { register } from 'node:module';
 import { pathToFileURL } from 'node:url';
 
-import { checkInfluxConnection } from './config/influxDB.js';
-import { checkDatabaseConnections } from './config/postgres.js';
-import { checkRedisConnection } from './config/redis.js';
+import { checkInfluxConnection } from './config/influxDB';
+import { checkDatabaseConnections } from './config/postgres';
+import { checkRedisConnection } from './config/redis';
 
 register('ts-node/esm', pathToFileURL('./'));
 
 import fs from 'fs';
 import https from 'https';
 
-import app from './app.js';
-import logger from './logger/winston-logger.js';
-import { shutdownMetricsPool, startPeriodicMetricsRefresh } from './system/index.js';
-import gracefulShutdown from './utils/gracefulShutdown.js';
-import { closeWebSocketServer, setupWebSocketServer } from './wss.js';
+import app from './app';
+import logger from './logger/winston-logger';
+import { shutdownMetricsPool, startPeriodicMetricsRefresh } from './system/index';
+import gracefulShutdown from './utils/gracefulShutdown';
+import { closeWebSocketServer, setupWebSocketServer } from './wss';
 
 const port = process.env.PORT ? Number(process.env.PORT) : 8888;
 const sslKeyPath = process.env.SSL_KEY;

@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import { Request } from 'express';
 import morgan from 'morgan';
 
-import { timestampFormatGmt } from '../utils/timestamp-format.js';
+import { timestampFormatGmt } from '../utils/timestamp-format';
 
 // Custom tokens
 morgan.token('gmt-date', () => timestampFormatGmt(new Date()));

@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import { InfluxDB } from '@influxdata/influxdb-client';
 
-import logger from '../logger/winston-logger.js';
+import logger from '../logger/winston-logger';
 
 const INFLUX_URL = process.env.INFLUX_URL;
 const INFLUX_TOKEN = process.env.INFLUX_TOKEN;
@@ -11,7 +11,9 @@ const INFLUX_ORG = process.env.INFLUX_ORG;
 const INFLUX_BUCKET = process.env.INFLUX_BUCKET;
 
 if (!INFLUX_URL || !INFLUX_TOKEN || !INFLUX_ORG || !INFLUX_BUCKET) {
-  logger.error('❌ InfluxDB configuration is missing. Please set INFLUX_URL, INFLUX_TOKEN, INFLUX_ORG, and INFLUX_BUCKET environment variables.');
+  logger.error(
+    '❌ InfluxDB configuration is missing. Please set INFLUX_URL, INFLUX_TOKEN, INFLUX_ORG, and INFLUX_BUCKET environment variables.',
+  );
   process.exit(1);
 }
 

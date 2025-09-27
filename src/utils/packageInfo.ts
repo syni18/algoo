@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { timestampFormatGmt } from './timestamp-format.js';
+import { timestampFormatGmt } from './timestamp-format';
 
 const getPackageInfo = () => {
   try {

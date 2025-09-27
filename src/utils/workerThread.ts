@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import { Worker } from 'worker_threads';
 
-import { Job } from '../interfaces.js';
+import { Job } from '../interfaces';
 
 export class WorkerPool extends EventEmitter {
   private workers: Worker[] = [];

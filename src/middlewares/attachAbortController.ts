@@ -1,7 +1,7 @@
 // middleware/attachAbortController.ts
 import type { NextFunction, Request, Response } from 'express';
 
-import { abortManager } from '../utils/abort.js';
+import { abortManager } from '../utils/abort';
 
 export function attachAbortController(timeoutMs?: number) {
   return (req: Request, res: Response, next: NextFunction) => {

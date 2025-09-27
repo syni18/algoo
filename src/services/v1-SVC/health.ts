@@ -1,10 +1,10 @@
 // services/v1-SVC/health.ts
-import { HttpError } from '../../errors/HttpError.js';
-import { renderHealthHTML } from '../../HTML/healthView.js';
-import { renderHealthJSON } from '../../HTML/testFile.js';
-import { ServiceMeta } from '../../interfaces.js';
-import logger from '../../logger/winston-logger.js';
-import { collectMetrics, getLastMetricsSnapshot } from '../../system/index.js';
+import { HttpError } from '../../errors/HttpError';
+import { renderHealthHTML } from '../../HTML/healthView';
+import { renderHealthJSON } from '../../HTML/testFile';
+import { ServiceMeta } from '../../interfaces';
+import logger from '../../logger/winston-logger';
+import { collectMetrics, getLastMetricsSnapshot } from '../../system/index';
 
 export const getSystemHealth = async (format: string, meta: ServiceMeta) => {
   let snap = getLastMetricsSnapshot();

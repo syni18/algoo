@@ -9,12 +9,12 @@ import path from 'path';
 import favicon from 'serve-favicon';
 import toobusy from 'toobusy-js';
 
-import morganLogger from './logger/morgan-logger.js';
-import logger from './logger/winston-logger.js';
-import { exposeMetricsEndpoint, metricsMiddleware } from './metrics.js';
-import errorHandler from './middlewares/errorHandler.js';
-import gracefulShutdown from './utils/gracefulShutdown.js';
-import { closeWebSocketServer, setupWebSocketServer } from './wss.js';
+import morganLogger from './logger/morgan-logger';
+import logger from './logger/winston-logger';
+import { exposeMetricsEndpoint, metricsMiddleware } from './metrics';
+import errorHandler from './middlewares/errorHandler';
+import gracefulShutdown from './utils/gracefulShutdown';
+import { closeWebSocketServer, setupWebSocketServer } from './wss';
 
 const app = express();
 

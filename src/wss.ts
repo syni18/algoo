@@ -5,8 +5,8 @@ import type { TLSSocket } from 'tls';
 import url from 'url';
 import { WebSocketServer } from 'ws';
 
-import logger from './logger/winston-logger.js';
-import { wsRoutes } from './routes/index.js';
+import logger from './logger/winston-logger';
+import { wsRoutes } from './routes/index';
 
 type ServerType = HTTPServer | HTTPSServer;
 

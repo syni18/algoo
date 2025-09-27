@@ -1,9 +1,9 @@
-import { ExtendedMetricsSnapshot } from 'interfaces.js';
+import { ExtendedMetricsSnapshot } from 'interfaces';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import logger from '../logger/winston-logger.js';
-import { WorkerPool } from '../utils/workerThread.js'; // Import the scalable WorkerPool class
+import logger from '../logger/winston-logger';
+import { WorkerPool } from '../utils/workerThread'; // Import the scalable WorkerPool class
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,16 +16,13 @@ const METRICS_REFRESH_INTERVAL_MS = process.env.METRICS_REFRESH_INTERVAL_MS
 let refreshIntervalId: NodeJS.Timeout | null = null;
 
 // Initialize worker pool with 2 workers (adjust size based on load)
-const isDist = __dirname.includes(path.sep + 'dist' + path.sep) || __dirname.endsWith(path.sep + 'dist');
+const isDist =
+  __dirname.includes(path.sep + 'dist' + path.sep) || __dirname.endsWith(path.sep + 'dist');
 const ext = isDist ? '.js' : '.ts';
 
 const metricsWorkerPath = path.resolve(__dirname, `./system-metrics${ext}`);
 
-const metricsWorkerPool = new WorkerPool(
-  metricsWorkerPath,
-  Number(process.env.WORKERPOOL_SIZE),
-);
-
+const metricsWorkerPool = new WorkerPool(metricsWorkerPath, Number(process.env.WORKERPOOL_SIZE));
 
 // Cached last metrics snapshot
 let lastMetricsSnapshot: any = null;

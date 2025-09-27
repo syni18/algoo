@@ -1,6 +1,6 @@
-import { ExtendedMetricsSnapshot } from '../interfaces.js';
-import { formatBytes } from '../utils/formatBytes.js';
-import { timestampFormatGmt } from '../utils/timestamp-format.js';
+import { ExtendedMetricsSnapshot } from '../interfaces';
+import { formatBytes } from '../utils/formatBytes';
+import { timestampFormatGmt } from '../utils/timestamp-format';
 
 export const renderHealthJSON = (snap: ExtendedMetricsSnapshot) => {
   // Helper function to get status as normalized string and severity

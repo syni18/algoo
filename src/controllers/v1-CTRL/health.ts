@@ -1,7 +1,8 @@
-import { getMeta } from '../../utils/packageInfo.js';
-import { sendResponse } from '../../utils/sendResponse.js';
 import { Request, Response } from 'express';
-import { getSystemHealth } from '../../services/v1-SVC/health.js';
+
+import { getSystemHealth } from '../../services/v1-SVC/health';
+import { getMeta } from '../../utils/packageInfo';
+import { sendResponse } from '../../utils/sendResponse';
 
 export const getHealth = async (req: Request, res: Response) => {
   const { format } = req.query;

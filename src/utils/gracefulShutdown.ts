@@ -1,6 +1,6 @@
 import { Server } from 'http';
 
-import logger from '../logger/winston-logger.js';
+import logger from '../logger/winston-logger';
 // Helper to handle graceful shutdown logic
 const gracefulShutdown = (server: Server, cleanupFn: () => Promise<void> = async () => {}) => {
   const shutdownSignals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM'];

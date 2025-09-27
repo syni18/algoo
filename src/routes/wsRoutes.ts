@@ -1,6 +1,6 @@
 import type { WebSocket } from 'ws';
 
-import { chatController } from '../controllers/ws_chats.js';
+import { chatController } from '../controllers/ws_chats';
 
 export const wsRoutes = (pathname: string, ws: WebSocket): void => {
   switch (pathname) {

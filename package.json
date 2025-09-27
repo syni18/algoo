@@ -2,7 +2,7 @@
   "name": "algoo",
   "version": "1.0.0",
   "description": "A modern Node.js backend project with TypeScript and ESM",
-  "main": "dist/server.js",
+  "main": "dist/src/server.js",
   "type": "module",
   "engines": {
     "node": ">=18"
@@ -10,14 +10,15 @@
   "scripts": {
     "dev": "bun --watch src/server.ts",
     "build": "tsc && tsc-alias",
-    "start:otel": "node --require ./dist/src/otel.js ./dist/src/server.js",
-    "build:webpack": "webpack --config ./dist/webpack.config.js",
+    "start:otel": "node --loader ts-node/esm --experimental-specifier-resolution=node --require ./dist/src/otel/otel.js ./dist/src/server.js",
+    "build:webpack": "webpack --config dist/webpack.config.js --mode production",
     "build:prod": "npm run build && npm run build:webpack",
     "start": "node dist/server.js",
+    "start:bundle": "node dist/bundle/server.cjs",
     "start:nodemon": "nodemon --watch src --exec tsx src/server.ts",
-    "start:pm2": "pm2 start dist/server.js --name=algoo",
+    "start:pm2": "pm2 start --interpreter ts-node dist/src/server.js --name=algoo-api",
     "start:pm2dev": "pm2 start src/server.ts --interpreter=./node_modules/.bin/tsx --name=algoo-dev --watch",
-    "pm2:runtime": "pm2-runtime dist/server.js",
+    "pm2:runtime": "pm2-runtime dist/src/server.js",
     "pm2:ecosystem": "pm2 start ecosystem.config.cjs",
     "worker": "tsx src/worker.ts",
     "service-worker": "tsx src/service-worker.ts",
@@ -34,8 +35,11 @@
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/auto-instrumentations-node": "^0.64.1",
     "@opentelemetry/exporter-prometheus": "^0.205.0",
+    "@opentelemetry/resources": "^2.1.0",
     "@opentelemetry/sdk-node": "^0.205.0",
+    "@opentelemetry/semantic-conventions": "^1.37.0",
     "argon2": "^0.44.0",
+    "bufferutil": "^4.0.9",
     "chalk": "^5.6.2",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
@@ -56,6 +60,7 @@
     "stock-nse-india": "^1.2.2",
     "toobusy-js": "^0.5.1",
     "typeorm": "^0.3.27",
+    "utf-8-validate": "^6.0.5",
     "winston": "^3.17.0",
     "ws": "^8.18.3"
   },
@@ -74,6 +79,7 @@
     "@types/opossum": "^8.1.9",
     "@types/serve-favicon": "^2.5.7",
     "@types/toobusy-js": "^0.5.4",
+    "@types/webpack-node-externals": "^3.0.4",
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
     "eslint": "^9.35.0",
@@ -91,6 +97,7 @@
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.43.0",
     "webpack": "^5.101.0",
-    "webpack-cli": "^6.0.1"
+    "webpack-cli": "^6.0.1",
+    "webpack-node-externals": "^3.0.0"
   }
 }

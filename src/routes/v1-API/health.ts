@@ -1,8 +1,9 @@
 // src/routes/user.routes.ts
-import { getHealth } from '../../controllers/v1-CTRL/health.js';
 import { Router } from 'express';
-import { Route } from '../../interfaces.js';
-import { catchAsync } from '../../middlewares/catchAsync.js';
+
+import { getHealth } from '../../controllers/v1-CTRL/health';
+import { Route } from '../../interfaces';
+import { catchAsync } from '../../middlewares/catchAsync';
 
 const router = Router();
 

@@ -9,17 +9,17 @@ import morgan from 'morgan';
 import path from 'path';
 import type { Metric } from 'prom-client';
 import * as promClient from 'prom-client';
-import { sqlInjectionDetectorAdvanced } from './security/SQLInjection.js';
 import toobusy from 'toobusy-js';
 
-import { renderHealthHTML } from './HTML/healthView.js';
+import { renderHealthHTML } from './HTML/healthView';
 // Custom modules
-import morganLogger from './logger/morgan-logger.js';
-import logger from './logger/winston-logger.js';
-import { exposeMetricsEndpoint, metricsMiddleware } from './metrics.js';
-import errorHandler from './middlewares/errorHandler.js';
-import { httpRoutes } from './routes/index.js';
-import { collectMetrics, getLastMetricsSnapshot } from './system/index.js';
+import morganLogger from './logger/morgan-logger';
+import logger from './logger/winston-logger';
+import { exposeMetricsEndpoint, metricsMiddleware } from './metrics';
+import errorHandler from './middlewares/errorHandler';
+import { httpRoutes } from './routes/index';
+import { sqlInjectionDetectorAdvanced } from './security/SQLInjection';
+import { collectMetrics, getLastMetricsSnapshot } from './system/index';
 
 const app = express();
 

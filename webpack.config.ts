@@ -1,6 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
-import type { Configuration } from 'webpack';
+import { Configuration } from 'webpack';
+import nodeExternals from 'webpack-node-externals';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,9 +11,12 @@ const config: Configuration = {
   target: 'node',
   entry: './src/server.ts',
   output: {
-    filename: 'server.js',
-    path: path.resolve(__dirname, 'dist'),
+    filename: 'server.cjs',
+    path: path.resolve(__dirname, 'bundle'),
     clean: true,
+    library: {
+      type: 'commonjs2', // optional but safer for Node ESM + require interop
+    },
   },
   resolve: {
     extensions: ['.ts', '.js'],
@@ -26,11 +30,12 @@ const config: Configuration = {
       },
     ],
   },
+  externalsPresets: { node: true }, // ignore built-ins like fs, path, crypto
+  externals: [nodeExternals()], // ignore all node_modules (dotenv, pg, express, etc.)
   devtool: process.env.NODE_ENV === 'production' ? false : 'inline-source-map',
   optimization: {
     minimize: false,
   },
-  externalsPresets: { node: true },
 };
 
 export default config;

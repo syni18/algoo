@@ -1,7 +1,7 @@
 import CircuitBreaker from 'opossum';
 import { Pool } from 'pg';
 
-import logger from '../logger/winston-logger.js';
+import logger from '../logger/winston-logger';
 
 type QueryParam = string | number | boolean | null | Date | Buffer;
 

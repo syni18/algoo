@@ -1,6 +1,6 @@
 import { Redis } from 'ioredis';
 
-import logger from '../logger/winston-logger.js';
+import logger from '../logger/winston-logger';
 
 // const redisClient = new Redis.Cluster(
 //   [

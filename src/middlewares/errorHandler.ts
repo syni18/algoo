@@ -1,10 +1,10 @@
 // src/middleware/errorHandler.ts
-import { sendResponse } from '../utils/sendResponse.js';
-import { timestampFormatGmt } from '../utils/timestamp-format.js';
 import { NextFunction, Request, Response } from 'express';
 
-import { HttpError } from '../errors/HttpError.js';
-import logger from '../logger/winston-logger.js';
+import { HttpError } from '../errors/HttpError';
+import logger from '../logger/winston-logger';
+import { sendResponse } from '../utils/sendResponse';
+import { timestampFormatGmt } from '../utils/timestamp-format';
 
 const errorHandler = (err: Error | HttpError, req: Request, res: Response, _next: NextFunction) => {
   let statusCode: number;
