@@ -70,3 +70,9 @@ desktop.ini
 
 # certificates temperory files
 certs/
+
+# test files
+src/test/
+
+# bloom filter data
+data/

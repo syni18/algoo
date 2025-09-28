@@ -1,5 +1,5 @@
 import CircuitBreaker from 'opossum';
-import { Pool } from 'pg';
+import { Pool, QueryResult } from 'pg';
 
 import logger from '../logger/winston-logger';
 
@@ -75,7 +75,7 @@ function isReadQuery(text: string) {
 let replicaIndex = 0;
 
 // Main exported query function - routes queries to proper pool with circuit breaker
-async function query(text: string, params: QueryParam[] = []) {
+async function query(text: string, params: QueryParam[] = []) : Promise<QueryResult> {
   if (isReadQuery(text) && replicaBreakers.length > 0) {
     // Try replicas round-robin
     const totalReplicas = replicaBreakers.length;

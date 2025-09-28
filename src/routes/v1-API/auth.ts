@@ -1,18 +1,27 @@
-// src/routes/health.ts
+// src/routes/auth.ts
 import { Router } from 'express';
 
-import { getHealth } from '../../controllers/v1-CTRL/health';
+import { loginUser, createUser, usernameExists } from '../../controllers/v1-CTRL/auth';
 import { Route } from '../../interfaces';
 import { catchAsync } from '../../middlewares/catchAsync';
 
 const router = Router();
-
+// const authMethods = ["email"]
 const routes: Route[] = [
   {
     method: 'get',
-    path: '/',
-    // middleware: [authenticate],
-    handler: catchAsync(getHealth),
+    path: '/isusernametaken/:username',
+    handler: catchAsync(usernameExists),
+  },
+  {
+    method: 'post',
+    path: '/login',
+    handler: catchAsync(loginUser),
+  },
+  {
+    method: 'post',
+    path: '/register',
+    handler: catchAsync(createUser),
   },
 ];
 
@@ -30,6 +39,6 @@ routes.forEach((route) => {
 });
 
 export default {
-  basePath: '/health',
+  basePath: '/auth',
   router,
 };

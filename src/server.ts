@@ -18,6 +18,7 @@ import logger from './logger/winston-logger';
 import { shutdownMetricsPool, startPeriodicMetricsRefresh } from './system/index';
 import gracefulShutdown from './utils/gracefulShutdown';
 import { closeWebSocketServer, setupWebSocketServer } from './wss';
+import bloomFilterService from './utils/bloomFilter';
 
 const port = process.env.PORT ? Number(process.env.PORT) : 8888;
 const sslKeyPath = process.env.SSL_KEY;
@@ -25,31 +26,63 @@ const sslCertPath = process.env.SSL_CERT;
 
 let server;
 
+// Set up Bloom filter event handlers before initialization
+bloomFilterService.on("ready", () => {
+  logger.info("🌸 Bloom filter is ready for use");
+});
+
+bloomFilterService.on("error", (error) => {
+  logger.error("🌸 Bloom filter error:", error);
+});
+
+// Async function to initialize services
+async function initializeServices() {
+  try {
+    logger.info('🚀 Initializing services...');
+
+    // Check all connections first
+    await Promise.all([
+      checkDatabaseConnections(),
+      checkRedisConnection(),
+      checkInfluxConnection()
+    ]);
+
+    // Initialize Bloom filter after database is confirmed working
+    logger.info('🌸 Initializing Bloom filter service...');
+    await bloomFilterService.initialize();
+
+    const lockStatus = await bloomFilterService.checkLockStatus();
+    if (lockStatus) {
+      logger.info('🌸 Bloom filter is currently locked by another process.');
+      return;
+    }
+    
+    // Start periodic refresh only after successful initialization
+    bloomFilterService.startPeriodicRefresh();
+    
+    logger.info('✅ All services initialized successfully');
+  } catch (error) {
+    logger.error('❌ Failed to initialize services:', error);
+    process.exit(1); // Exit if critical services fail
+  }
+}
+
 // Start server
 if (sslKeyPath && sslCertPath && fs.existsSync(sslKeyPath) && fs.existsSync(sslCertPath)) {
   const key = fs.readFileSync(sslKeyPath);
   const cert = fs.readFileSync(sslCertPath);
-  server = https.createServer({ key, cert }, app).listen(port, () => {
+  server = https.createServer({ key, cert }, app).listen(port, async () => {
     logger.info(
       `🔒 HTTPS server running at https://${process.env.HOSTNAME || 'localhost'}:${port} [${
         process.env.NODE_ENV
       }]`,
     );
-  });
-  // Check DB connections on startup
-  checkDatabaseConnections().catch((err) => {
-    logger.error('Error checking database connections:', err);
-  });
-  // Check Redis connection on startup
-  checkRedisConnection().catch((err) => {
-    logger.error('Error checking Redis connection:', err);
-  });
-  // Check InfluxDB connection on startup
-  checkInfluxConnection().catch((err) => {
-    logger.error('Error checking InfluxDB connection:', err);
+    
+    // Initialize services after server starts
+    await initializeServices();
   });
 } else {
-  server = app.listen(port, () => {
+  server = app.listen(port, async () => {
     logger.info(
       `🚀 HTTP server running at http://${process.env.HOSTNAME || 'localhost'}:${port} [${
         process.env.NODE_ENV
@@ -61,18 +94,9 @@ if (sslKeyPath && sslCertPath && fs.existsSync(sslKeyPath) && fs.existsSync(sslC
     if (!sslCertPath || !fs.existsSync(sslCertPath)) {
       logger.warn('No SSL cert found; running in HTTP mode.');
     }
-  });
-  // Check DB connections on startup
-  checkDatabaseConnections().catch((err) => {
-    logger.error('Error checking database connections:', err);
-  });
-  // Check Redis connection on startup
-  checkRedisConnection().catch((err) => {
-    logger.error('Error checking Redis connection:', err);
-  });
-  // Check InfluxDB connection on startup
-  checkInfluxConnection().catch((err) => {
-    logger.error('Error checking InfluxDB connection:', err);
+    
+    // Initialize services after server starts
+    await initializeServices();
   });
 }
 
@@ -84,9 +108,28 @@ startPeriodicMetricsRefresh();
 
 // Cleanup logic for graceful shutdown
 const cleanup = async () => {
-  await closeWebSocketServer();
-  await shutdownMetricsPool();
-  logger.info('Cleanup complete. (Close DB, flush logs, etc.)');
+  logger.info('🛑 Starting graceful shutdown...');
+  
+  try {
+    // Gracefully shutdown Bloom filter
+    await bloomFilterService.shutdown();
+    
+    await closeWebSocketServer();
+    await shutdownMetricsPool();
+    
+    // Close Redis connection if it exists
+    try {
+      const { redisClient } = await import('./config/redis');
+      await redisClient.quit();
+      logger.info('✅ Redis connection closed');
+    } catch (err) {
+      logger.error('Error closing Redis connection:', err);
+    }
+    
+    logger.info('✅ Cleanup complete');
+  } catch (error) {
+    logger.error('❌ Error during cleanup:', error);
+  }
 };
 
 gracefulShutdown(server, cleanup);

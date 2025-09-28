@@ -5,6 +5,8 @@ import { attachAbortController } from '../middlewares/attachAbortController';
 import longRunningWork from '../utils/longWork';
 import { sendResponse } from '../utils/sendResponse';
 import health from './v1-API/health';
+import auth from './v1-API/auth';
+
 const router = Router();
 
 router.get('/', (req, res) => {
@@ -19,7 +21,7 @@ router.get('/', (req, res) => {
 });
 
 // Array of all routes
-const routeModules = [health];
+const routeModules = [health, auth];
 
 routeModules.forEach((mod) => {
   router.use(mod.basePath, mod.router);
