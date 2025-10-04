@@ -16,7 +16,7 @@ export const getSystemHealth = async (format: string, meta: ServiceMeta) => {
   }
 
   if (!snap) {
-    throw new HttpError('Unable to collect metrics', 500);
+    throw new HttpError('Internal server error.', 500);
   }
 
   return format === 'JSON' ? renderHealthJSON(snap) : renderHealthHTML(snap, meta);

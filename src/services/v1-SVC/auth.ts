@@ -10,7 +10,7 @@ import { timestampFormatGmt } from '@utils/timestamp-format';
 
 export const checkUsernameExists = async (username: string): Promise<object> => {
   if (!username) {
-    throw new HttpError('Invalid username', 400);
+    throw new HttpError('Invalid username', 401);
   }
 
   // First check Bloom filter
@@ -80,7 +80,7 @@ export const createNewUser = async (
 
     const conflict = await query(checkQ, [email, username]);
     const field = conflict.rows[0]?.conflict || 'email or username';
-    throw new HttpError(`User with this ${field} already exists. Please login.`, 400);
+    throw new HttpError(`${field} already exists. Please login.`, 409);
   }
 
   return newUser.rows[0];
@@ -103,7 +103,7 @@ export const loginUserByIdentifier = async (
   const userExist = await query(sql, [identifier]);
 
   if (userExist.rowCount === 0) {
-    throw new HttpError('Invalid username/email or password.', 400);
+    throw new HttpError('Invalid credentials.', 401);
   }
 
   // 1. Check if account is locked
@@ -136,7 +136,7 @@ export const loginUserByIdentifier = async (
       throw new HttpError(`Account locked due to multiple failed login attempts. Try again after 10 minutes.`, 403);
     }
 
-    throw new HttpError('Invalid username/email or password.', 400);
+    throw new HttpError('Invalid credentials.', 401);
   }
 
   // Update login-related fields

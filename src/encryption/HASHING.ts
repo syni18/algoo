@@ -22,7 +22,7 @@ export async function argonVerifyPassword(hash: string, password: string): Promi
   try {
     return await argon2.verify(hash, password);
   } catch {
-    throw new HttpError('Failed to verify Password', 400);
+    throw new HttpError('Invalid Credentials', 401);
   }
 }
 
@@ -45,6 +45,6 @@ export async function verifyPassword(
     return await bcrypt.compare(candidatePassword, hashedPassword);
   } catch (error) {
     // Properly log error here
-    throw new HttpError('Failed to verify Password', 400);
+    throw new HttpError('Invalid Credentials', 401);
   }
 }

@@ -14,7 +14,7 @@ export const validateRequest =
         path: issue.path.join('.'),
         message: issue.message,
       }));
-      throw new HttpError(`Validation Error: ${errors[0].message}`, 400);
+      throw new HttpError(`Invalid Request: ${errors[0].message}`, 400);
     }
 
     // overwrite request with safe parsed data

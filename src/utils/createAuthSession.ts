@@ -45,7 +45,7 @@ export const createAuthForUser = async (
   ]);
 
   if ((r.rowCount ?? 0) === 0) {
-    throw new HttpError('Unable to create or update User session.', 400);
+    throw new HttpError('Session failed.', 400);
   }
 
   return {
