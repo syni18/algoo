@@ -4,8 +4,8 @@ import { Router } from 'express';
 import { attachAbortController } from '../middlewares/attachAbortController';
 import longRunningWork from '../utils/longWork';
 import { sendResponse } from '../utils/sendResponse';
-import health from './v1-API/health';
 import auth from './v1-API/auth';
+import health from './v1-API/health';
 
 const router = Router();
 

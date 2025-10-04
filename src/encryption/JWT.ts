@@ -19,6 +19,10 @@ const JWT_SECRETS: Record<string, string> = {
   'v1-refresh': JWT_REFRESH_SECRET,
 };
 
+// Fix: Now properly typed variables work with ms()
+const accessExpiresMs = ms(ACCESS_TOKEN_EXPIRES_IN);
+const refreshExpiresMs = ms(REFRESH_TOKEN_EXPIRES_IN);
+
 // -------------------- Interfaces --------------------
 export interface TokenPayload {
   userId: number;
@@ -57,10 +61,6 @@ export function generateTokens(payload: TokenPayload) {
 
   const accessToken = jwt.sign(payload, JWT_ACCESS_SECRET!, accessOptions);
   const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET!, refreshOptions);
-
-  // Fix: Now properly typed variables work with ms()
-  const accessExpiresMs = ms(ACCESS_TOKEN_EXPIRES_IN);
-  const refreshExpiresMs = ms(REFRESH_TOKEN_EXPIRES_IN);
 
   return {
     accessToken,

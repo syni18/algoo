@@ -41,6 +41,7 @@ const errorHandler = (err: Error | HttpError, req: Request, res: Response, _next
     typeof (err as { stack?: unknown }).stack === 'string'
   ) {
     meta.stack = (err as { stack: string }).stack;
+    meta.message = err.message;
   }
 
   // ✅ Use sendResponse for consistency

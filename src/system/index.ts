@@ -1,7 +1,7 @@
-import { ExtendedMetricsSnapshot } from 'interfaces';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { ExtendedMetricsSnapshot } from '../interfaces';
 import logger from '../logger/winston-logger';
 import { WorkerPool } from '../utils/workerThread'; // Import the scalable WorkerPool class
 

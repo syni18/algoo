@@ -5,7 +5,9 @@ import logger from '../logger/winston-logger';
 
 type QueryParam = string | number | boolean | null | Date | Buffer;
 
-// Primary (write) PostgreSQL pool config from env
+// ---------------------
+// Pool initialization
+// ---------------------
 const primaryPool = new Pool({
   host: process.env.PG_PRIMARY_HOST,
   port: Number(process.env.PG_PRIMARY_PORT),
@@ -17,9 +19,7 @@ const primaryPool = new Pool({
   connectionTimeoutMillis: 5000,
 });
 
-// Replica (read) PostgreSQL pools config from env - add as many replicas as needed
 const replicaPools: Pool[] = [];
-
 if (process.env.PG_REPLICA_HOST) {
   replicaPools.push(
     new Pool({
@@ -34,16 +34,13 @@ if (process.env.PG_REPLICA_HOST) {
     }),
   );
 }
-// Add more replicas here if you have them, e.g. PG_REPLICA2_HOST and so on.
 
-// Circuit breakers wrapping pools for resilience
+// ---------------------
+// Circuit breakers
+// ---------------------
 const primaryBreaker = new CircuitBreaker(
   (text: string, params: QueryParam[]) => primaryPool.query(text, params),
-  {
-    timeout: 4000,
-    errorThresholdPercentage: 50,
-    resetTimeout: 10000,
-  },
+  { timeout: 4000, errorThresholdPercentage: 50, resetTimeout: 10000 },
 );
 
 const replicaBreakers = replicaPools.map(
@@ -55,66 +52,75 @@ const replicaBreakers = replicaPools.map(
     }),
 );
 
-// Circuit breaker fallback for primary - reject promise after retries
 primaryBreaker.fallback(() =>
   Promise.reject(new Error('Primary PostgreSQL query failed after retries')),
 );
 
-// Circuit breaker fallback for replicas - reject promise as well
 replicaBreakers.forEach((rb) =>
   rb.fallback(() => Promise.reject(new Error('Replica PostgreSQL query failed after retries'))),
 );
 
-// Simple helper to detect if query is a read/select
-function isReadQuery(text: string) {
-  const queryType = text.trim().split(' ')[0].toLowerCase();
-  return queryType === 'select' || queryType === 'show' || queryType === 'describe';
-}
-
-// Round-robin index for replicas
+// ---------------------
+// Query helpers
+// ---------------------
 let replicaIndex = 0;
 
-// Main exported query function - routes queries to proper pool with circuit breaker
-async function query(text: string, params: QueryParam[] = []) : Promise<QueryResult> {
-  if (isReadQuery(text) && replicaBreakers.length > 0) {
-    // Try replicas round-robin
-    const totalReplicas = replicaBreakers.length;
-    let lastError: Error | null = null;
+function isReadQuery(text: string) {
+  const queryType = text.trim().split(' ')[0].toLowerCase();
+  return ['select', 'show', 'describe'].includes(queryType);
+}
 
-    for (let i = 0; i < totalReplicas; i++) {
-      const breaker = replicaBreakers[replicaIndex];
-      replicaIndex = (replicaIndex + 1) % totalReplicas;
-      try {
-        return await breaker.fire(text, params);
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          lastError = error;
-          logger.error(
-            `[Replica Query Error] Attempt ${i + 1}/${totalReplicas}:`,
-            lastError.message,
-          );
-        } else {
-          // If error is not an Error instance, fallback to generic error log/message
-          logger.error(
-            `[Replica Query Error] Attempt ${i + 1}/${totalReplicas}: Unknown error`,
-            error,
-          );
-        }
-      }
-    }
-    // If all replicas fail, fallback to primary with logging
-    logger.warn('All replicas failed for read query, falling back to primary');
-  }
-  // For writes or fallback, query primary
+// Always query PRIMARY
+async function queryPrimary(text: string, params: QueryParam[] = []): Promise<QueryResult> {
   return primaryBreaker.fire(text, params);
 }
 
-// Optional: graceful shutdown of pools
+// Always query REPLICA (round robin), fallback to primary if needed
+async function queryReplica(text: string, params: QueryParam[] = []): Promise<QueryResult> {
+  const totalReplicas = replicaBreakers.length;
+  if (totalReplicas === 0) {
+    logger.warn('No replicas configured, using primary instead.');
+    return queryPrimary(text, params);
+  }
+
+  let lastError: Error | null = null;
+
+  for (let i = 0; i < totalReplicas; i++) {
+    const breaker = replicaBreakers[replicaIndex];
+    replicaIndex = (replicaIndex + 1) % totalReplicas;
+
+    try {
+      return await breaker.fire(text, params);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        lastError = error;
+        logger.error(
+          `[Replica Query Error] Attempt ${i + 1}/${totalReplicas}: ${lastError.message}`,
+        );
+      } else {
+        logger.error(
+          `[Replica Query Error] Attempt ${i + 1}/${totalReplicas}: Unknown error`,
+          error,
+        );
+      }
+    }
+  }
+
+  logger.warn('⚠️ All replicas failed, falling back to primary');
+  return queryPrimary(text, params);
+}
+
+// Router → delegates based on query type
+async function query(text: string, params: QueryParam[] = []): Promise<QueryResult> {
+  return isReadQuery(text) ? queryReplica(text, params) : queryPrimary(text, params);
+}
+
+// ---------------------
+// Utilities
+// ---------------------
 async function closePools() {
   await Promise.all([primaryPool.end(), ...replicaPools.map((p) => p.end())]);
 }
-
-// Add at an appropriate place in your DB module file:
 
 async function checkDatabaseConnections() {
   try {
@@ -139,7 +145,9 @@ export {
   closePools,
   primaryBreaker,
   primaryPool,
-  query,
+  query, // main router
+  queryPrimary,
+  queryReplica,
   replicaBreakers,
   replicaPools,
 };

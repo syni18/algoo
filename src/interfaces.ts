@@ -247,3 +247,12 @@ export interface Route {
   middleware?: Array<(req: Request, res: Response, next: NextFunction) => void>;
   validationSchema?: any;
 }
+
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  middle_name: string | null;
+  last_name: string | null;
+}
