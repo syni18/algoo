@@ -5,7 +5,7 @@ import { createUser, loginUser, usernameExists } from '../../controllers/v1-CTRL
 import { Route } from '../../interfaces';
 import { catchAsync } from '../../middlewares/catchAsync';
 import { validateRequest } from '../../middlewares/validateRequest';
-import { createUserInputSchema, usernameInputSchema } from '../../validation/user';
+import { createUserInputSchema, usernameInputSchema, loginUserInputSchema } from '../../validation/user';
 
 const router = Router();
 // const authMethods = ["email"]
@@ -19,6 +19,7 @@ const routes: Route[] = [
   {
     method: 'post',
     path: '/login',
+    validationSchema: validateRequest(loginUserInputSchema, 'body'),
     handler: catchAsync(loginUser),
   },
   {

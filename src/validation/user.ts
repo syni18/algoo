@@ -27,5 +27,25 @@ export const createUserInputSchema = z.object({
     .max(100, 'Password must not exceed 100 characters'),
 });
 
+export const loginUserInputSchema = z.object({
+  identifier: z
+    .string()
+    .refine(
+      (val) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const usernameRegex = /^[a-zA-Z0-9_]+$/; // letters, numbers, underscores
+        return emailRegex.test(val) || usernameRegex.test(val);
+      },
+      {
+        message: 'Please enter valid credentials.',
+      }
+    ),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters long')
+    .max(100, 'Password must not exceed 100 characters'),
+});
+
+export type LoginUserBody = z.infer<typeof loginUserInputSchema>;
 export type UsernameParam = z.infer<typeof usernameInputSchema>;
 export type CreateUserBody = z.infer<typeof createUserInputSchema>;

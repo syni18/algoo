@@ -1,11 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { query } from '../../config/postgres';
-import { argonHashPassword } from '../../encryption/HASHING';
+import { argonHashPassword, argonVerifyPassword } from '../../encryption/HASHING';
 import { HttpError } from '../../errors/HttpError';
 import { User } from '../../interfaces';
 import bloomFilterService from '../../utils/bloomFilter';
 import { generateReferralCode } from '../../utils/referalCode';
+import { timestampFormatGmt } from '@utils/timestamp-format';
 
 export const checkUsernameExists = async (username: string): Promise<object> => {
   if (!username) {
@@ -83,4 +84,80 @@ export const createNewUser = async (
   }
 
   return newUser.rows[0];
+};
+
+export const loginUserByIdentifier = async (
+  identifier: string,
+  password: string,
+  ip: string
+): Promise<User> => {
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
+
+  const sql = isEmail
+    ? `SELECT id, login_count, failed_login_attempts, locked_until, password_hash
+       FROM users WHERE email = $1 LIMIT 1;`
+    : `SELECT id, login_count, failed_login_attempts, locked_until, password_hash
+       FROM users WHERE username = $1 LIMIT 1;`;
+
+
+  const userExist = await query(sql, [identifier]);
+
+  if (userExist.rowCount === 0) {
+    throw new HttpError('Invalid username/email or password.', 400);
+  }
+
+  // 1. Check if account is locked
+  if (userExist.rows[0].locked_until && new Date(userExist.rows[0].locked_until) > new Date()) {
+    throw new HttpError(
+      `Account locked until ${timestampFormatGmt(userExist.rows[0].locked_until)}. Try again after some time..`,
+      403
+    );
+  }
+
+  // verify password
+  const isMatch = await argonVerifyPassword(userExist.rows[0].password_hash, password);
+  if (!isMatch) {
+    const newAttempts = userExist.rows[0].failed_login_attempts + 1;
+    const lockedUntil = newAttempts >= Number(process.env.FAILED_LOGIN_ATTEMPT_LIMIT!) 
+                ? new Date(Date.now() + Number(process.env.LOCKED_UNTIL!)) 
+                : null;
+
+    await query(
+      `UPDATE users
+       SET failed_login_attempts = $2,
+           last_login_ip = $3,
+           updated_at = NOW(),
+           locked_until = $4
+       WHERE id = $1;`,
+      [userExist.rows[0].id, newAttempts, ip, lockedUntil]
+    );
+
+    if (lockedUntil) {
+      throw new HttpError(`Account locked due to multiple failed login attempts. Try again after 10 minutes.`, 403);
+    }
+
+    throw new HttpError('Invalid username/email or password.', 400);
+  }
+
+  // Update login-related fields
+  const updateQ = `UPDATE users 
+     SET
+        last_login_at = NOW(),
+        last_login_ip = $2,
+        login_count = $3,
+        updated_at = Now(),
+        failed_login_attempts = 0,
+        locked_until = NULL,
+        updated_by = $4
+     WHERE id = $1
+     RETURNING id, username, email, first_name,middle_name, last_name;`;
+
+  const res = await query(updateQ, [
+    userExist.rows[0].id,
+    ip,
+    userExist.rows[0].login_count + 1,
+    userExist.rows[0].id
+  ])
+
+  return res.rows[0];
 };
