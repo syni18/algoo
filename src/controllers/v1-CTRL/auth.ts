@@ -1,8 +1,16 @@
 import { Request, Response } from 'express';
 
-import { checkUsernameExists, createNewUser, loginUserByIdentifier } from '../../services/v1-SVC/auth';
+import { checkUsernameExists, createNewUser, loginUserByIdentifier, deleteUserAccount } from '../../services/v1-SVC/auth';
 import { createAuthForUser } from '../../utils/createAuthSession';
 import { sendResponse } from '../../utils/sendResponse';
+import { redisClient } from '@config/redis';
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+  sameSite: 'strict' as const,
+  path: '/',
+};
 
 export const usernameExists = async (req: Request, res: Response) => {
   const username = req.params.username?.trim();
@@ -25,14 +33,6 @@ export const loginUser = async (req: Request, res: Response) => {
   const r = await loginUserByIdentifier(identifier, password, ip);
 
   const auth = await createAuthForUser(r.id, r.email, r.username, ip, userAgent);
-
-  // Set secure HTTP-only cookies
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: 'strict' as const,
-    path: '/',
-  };
 
   res.cookie('accessToken', auth.accessToken, {
     ...cookieOptions,
@@ -72,14 +72,7 @@ export const createUser = async (req: Request, res: Response) => {
   // token + session
   const auth = await createAuthForUser(r.id, r.email, r.username, ip, userAgent);
 
-  // Set secure HTTP-only cookies
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: 'strict' as const,
-    path: '/',
-  };
-
+  // set http cookies 
   res.cookie('accessToken', auth.accessToken, {
     ...cookieOptions,
     maxAge: auth.accessTokenExpiresAt - Date.now(),
@@ -106,3 +99,31 @@ export const createUser = async (req: Request, res: Response) => {
     message: 'Account Created Successfully.',
   });
 };
+
+export const deleteUser = async (req: Request, res: Response) => {
+  const sessionId = req.cookies.sessionId;
+  const { id, username, email, password, delete_reason } = req.body;
+  const r = await deleteUserAccount(id, username, email, password, delete_reason);
+
+  if(r.success){
+    res.clearCookie('accessToken',{
+      ...cookieOptions
+    });
+    res.clearCookie('refreshToken', {
+      ...cookieOptions
+    });
+    res.clearCookie('sessionId', {
+      ...cookieOptions
+    })
+
+    await redisClient.del(`sess:${sessionId}`);
+  }
+
+  return sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    data: null,
+    message: 'Account delete Successfully.'
+  })
+}

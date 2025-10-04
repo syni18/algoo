@@ -161,3 +161,55 @@ export const loginUserByIdentifier = async (
 
   return res.rows[0];
 };
+
+export const deleteUserAccount = async (
+  id: string,
+  username: string,
+  email: string,
+  password: string,
+  delete_reason: string
+): Promise<{success: boolean, message: string}> => {
+  email = email.trim().toLowerCase();
+
+  const checkQ = `SELECT id, password_hash 
+    FROM users
+    WHERE id = $1 
+    AND is_deleted = $2
+    LIMIT 1;`;
+  
+  const userExist = await query(checkQ, [id, false]);
+  if(userExist.rowCount === 0){
+    throw new HttpError('Unauthorized Access', 401);
+  }
+
+  const isMatch = await argonVerifyPassword(userExist.rows[0].password_hash, password);
+  if(!isMatch){
+    throw new HttpError('Unauthorized Access', 401);
+  }
+
+  const deleteQ = `UPDATE users
+    SET
+      is_deleted = $2,
+      deleted_by = $3,
+      deleted_at = NOW(),
+      deletion_reason = $4,
+      updated_at = Now(),
+      updated_by = $5
+    WHERE id = $1;
+  `;
+  await query(deleteQ, [
+    userExist.rows[0].id,
+    true,
+    userExist.rows[0].id,
+    delete_reason,
+    userExist.rows[0].id
+  ]);
+
+  const sessionQ = `DELETE FROM user_sessions WHERE user_id = $1;`;
+  await query(sessionQ, [userExist.rows[0].id]);
+
+  return {
+    success: true,
+    message: 'account inactive successfully.'
+  }
+}

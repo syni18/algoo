@@ -10,6 +10,7 @@ import path from 'path';
 import type { Metric } from 'prom-client';
 import * as promClient from 'prom-client';
 import toobusy from 'toobusy-js';
+import cookieParser from 'cookie-parser';
 
 import { renderHealthHTML } from './HTML/healthView';
 // Custom modules
@@ -78,6 +79,9 @@ app.disable('x-powered-by');
 
 // Metrics
 app.use(metricsMiddleware);
+
+// cookie Parser
+app.use(cookieParser());
 
 // DDOS - Load Protection
 app.use((req, res, next) => {

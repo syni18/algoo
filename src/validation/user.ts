@@ -46,6 +46,27 @@ export const loginUserInputSchema = z.object({
     .max(100, 'Password must not exceed 100 characters'),
 });
 
+export const deleteUserInputSchema = z.object({
+  id: z
+    .string(),
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters long')
+    .max(20, 'Username must not exceed 20 characters')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+  email: z
+    .string()
+    .email('Invalid email address')
+    .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Email format is invalid'),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters long')
+    .max(100, 'Password must not exceed 100 characters'),
+  delete_reason: z
+    .string()
+})
+
+export type DeleteUserBody = z.infer<typeof deleteUserInputSchema>;
 export type LoginUserBody = z.infer<typeof loginUserInputSchema>;
 export type UsernameParam = z.infer<typeof usernameInputSchema>;
 export type CreateUserBody = z.infer<typeof createUserInputSchema>;
