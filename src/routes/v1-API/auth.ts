@@ -1,7 +1,7 @@
 // src/routes/auth.ts
 import { Router } from 'express';
 
-import { createUser, loginUser, usernameExists, deleteUser } from '../../controllers/v1-CTRL/auth';
+import { createUser, loginUser, usernameExists, deleteUser, logoutUser } from '../../controllers/v1-CTRL/auth';
 import { Route } from '../../interfaces';
 import { catchAsync } from '../../middlewares/catchAsync';
 import { validateRequest } from '../../middlewares/validateRequest';
@@ -33,6 +33,12 @@ const routes: Route[] = [
     path: '/delete-account',
     validationSchema: validateRequest(deleteUserInputSchema, 'body'),
     handler: catchAsync(deleteUser),
+  },
+  {
+    method: 'post',
+    path: '/logout',
+    // validationSchema:
+    handler: catchAsync(logoutUser),
   }
 ];
 

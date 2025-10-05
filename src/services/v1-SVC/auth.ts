@@ -118,9 +118,9 @@ export const loginUserByIdentifier = async (
   const isMatch = await argonVerifyPassword(userExist.rows[0].password_hash, password);
   if (!isMatch) {
     const newAttempts = userExist.rows[0].failed_login_attempts + 1;
-    const lockedUntil = newAttempts >= Number(process.env.FAILED_LOGIN_ATTEMPT_LIMIT!) 
-                ? new Date(Date.now() + Number(process.env.LOCKED_UNTIL!)) 
-                : null;
+    const lockedUntil = newAttempts >= Number(process.env.FAILED_LOGIN_ATTEMPT_LIMIT!)
+      ? new Date(Date.now() + Number(process.env.LOCKED_UNTIL!))
+      : null;
 
     await query(
       `UPDATE users
@@ -168,7 +168,7 @@ export const deleteUserAccount = async (
   email: string,
   password: string,
   delete_reason: string
-): Promise<{success: boolean, message: string}> => {
+): Promise<{ success: boolean, message: string }> => {
   email = email.trim().toLowerCase();
 
   const checkQ = `SELECT id, password_hash 
@@ -176,14 +176,14 @@ export const deleteUserAccount = async (
     WHERE id = $1 
     AND is_deleted = $2
     LIMIT 1;`;
-  
+
   const userExist = await query(checkQ, [id, false]);
-  if(userExist.rowCount === 0){
+  if (userExist.rowCount === 0) {
     throw new HttpError('Unauthorized Access', 401);
   }
 
   const isMatch = await argonVerifyPassword(userExist.rows[0].password_hash, password);
-  if(!isMatch){
+  if (!isMatch) {
     throw new HttpError('Unauthorized Access', 401);
   }
 
@@ -211,5 +211,41 @@ export const deleteUserAccount = async (
   return {
     success: true,
     message: 'account inactive successfully.'
+  }
+}
+
+export const logoutUserAccount = async (
+  id: string
+): Promise<{ id: string, success: boolean }> => {
+  const logoutQ = `UPDATE users
+    SET 
+      locked_until = NULL,
+      login_count = 0,
+      failed_login_attempts = 0,
+      updated_by = $1,
+      updated_at = NOW()
+    WHERE id = $1
+      AND login_count != 0
+    RETURNING id;`;
+
+  const sessionQ = `UPDATE user_sessions
+    SET
+      is_active = false,
+      last_accessed_at = NOW()
+    WHERE user_id = $1
+      AND is_active = true;`;
+
+  const [r, _] = await Promise.all([
+    query(logoutQ, [id]),
+    query(sessionQ, [id])
+  ]);
+
+  if(r.rowCount === 0) {
+    throw new HttpError('Unauthorized Access', 401);
+  }
+
+  return {
+    id: r.rows[0].id,
+    success: true
   }
 }
