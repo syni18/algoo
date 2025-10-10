@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
 import { query } from '../../config/postgres';
 import { argonHashPassword, argonVerifyPassword } from '../../encryption/HASHING';
@@ -6,7 +7,8 @@ import { HttpError } from '../../errors/HttpError';
 import { User } from '../../interfaces';
 import bloomFilterService from '../../utils/bloomFilter';
 import { generateReferralCode } from '../../utils/referalCode';
-import { timestampFormatGmt } from '@utils/timestamp-format';
+import { timestampFormatGmt } from '../../utils/timestamp-format';
+// import { sendPasswordResetEmail } from '../../utils/mailer/mailer';
 
 export const checkUsernameExists = async (username: string): Promise<object> => {
   if (!username) {
@@ -248,4 +250,46 @@ export const logoutUserAccount = async (
     id: r.rows[0].id,
     success: true
   }
+}
+
+// helper: hash token for storing in DB
+const hashToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
+
+export const requestPasswordReset = async (
+  identifier: string
+): Promise<void> => {
+  const idf = identifier.trim().toLowerCase();
+
+  const checkQ = `SELECT id, email, username
+    FROM users
+    WHERE (email = $1 OR username = $1 OR phone = $1)
+      AND deleted_at IS NULL
+    LIMIT 1;`;
+  
+  const userExist = await query(checkQ, [idf]);
+  if(userExist.rowCount === 0){
+    return;
+  }
+
+  const user = userExist.rows[0];
+
+  // token 
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  const dbToken = hashToken(rawToken);
+  const expireAt = new Date(Date.now() + Number(process.env.RESET_TOKEN_TTL_MIN!) * 60 * 1000);
+
+  const saveQ = `
+    UPDATE users
+    SET password_reset_token = $1,
+        password_reset_expires = $2,
+        updated_at = NOW()
+    WHERE id = $3;
+  `;
+  await query(saveQ, [dbToken, expireAt.toISOString(), user.id]);
+
+  // await sendPasswordResetEmail(user.email, {
+  //   username: user.username,
+  //   resetLink: `${process.env.HTTPS_SERVER!}://${process.env.HOSTNAME!}:${process.env.PORT!}/reset-password?token=${rawToken}`,
+  //   expiresInMinutes: Number(process.env.RESET_TOKEN_TTL_MIN!),
+  // });
 }

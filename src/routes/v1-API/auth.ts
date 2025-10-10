@@ -1,11 +1,11 @@
 // src/routes/auth.ts
 import { Router } from 'express';
 
-import { createUser, loginUser, usernameExists, deleteUser, logoutUser } from '../../controllers/v1-CTRL/auth';
+import { createUser, loginUser, usernameExists, deleteUser, logoutUser, forgetUser } from '../../controllers/v1-CTRL/auth';
 import { Route } from '../../interfaces';
 import { catchAsync } from '../../middlewares/catchAsync';
 import { validateRequest } from '../../middlewares/validateRequest';
-import { createUserInputSchema, usernameInputSchema, loginUserInputSchema, deleteUserInputSchema } from '../../validation/user';
+import { createUserInputSchema, usernameInputSchema, loginUserInputSchema, deleteUserInputSchema, forgetUserInputSchema } from '../../validation/user';
 
 const router = Router();
 // const authMethods = ["email"]
@@ -39,6 +39,12 @@ const routes: Route[] = [
     path: '/logout',
     // validationSchema:
     handler: catchAsync(logoutUser),
+  },
+  {
+    method: 'post',
+    path: '/forget-password',
+    validationSchema: validateRequest(forgetUserInputSchema, 'body'),
+    handler: catchAsync(forgetUser),
   }
 ];
 

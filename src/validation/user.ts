@@ -66,6 +66,22 @@ export const deleteUserInputSchema = z.object({
     .string()
 })
 
+export const forgetUserInputSchema = z.object({
+  identifier: z
+    .string()
+    .refine(
+      (val) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const usernameRegex = /^[a-zA-Z0-9_]+$/; // letters, numbers, underscores
+        return emailRegex.test(val) || usernameRegex.test(val);
+      },
+      {
+        message: 'Please enter valid credentials.',
+      }
+    ),
+});
+
+export type ForgetUserBody = z.infer<typeof forgetUserInputSchema>;
 export type DeleteUserBody = z.infer<typeof deleteUserInputSchema>;
 export type LoginUserBody = z.infer<typeof loginUserInputSchema>;
 export type UsernameParam = z.infer<typeof usernameInputSchema>;

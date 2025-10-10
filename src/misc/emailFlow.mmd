@@ -1,0 +1,36 @@
+graph TB
+    subgraph "API Layer"
+        A[API Request] --> B[enqueueMail]
+    end
+    
+    subgraph "Email Queue System"
+        B --> C[Validate Payload]
+        C --> D[Create Audit Record]
+        D --> E[Add to Redis Queue]
+        E --> F[Return Job ID]
+    end
+    
+    subgraph "Worker Processing"
+        E --> G[Mail Worker Pool<br/>Concurrency: 10]
+        G --> H{Send Email}
+        H -->|Success| I[Update Audit: sent]
+        H -->|Transient Error| J[Exponential Backoff Retry]
+        J --> H
+        H -->|Permanent Failure| K{Max Attempts?}
+        K -->|No| L[Update Audit: queued<br/>BullMQ Auto-Retry]
+        K -->|Yes| M[Move to DLQ]
+        M --> N[Update Audit: dlq]
+    end
+    
+    subgraph "Dead Letter Queue"
+        M --> O[DLQ Queue]
+        O --> P[Admin Dashboard]
+        P --> Q[Manual Review]
+        Q -->|Requeue| R[Back to Main Queue]
+        Q -->|Delete| S[Remove Forever]
+    end
+    
+    subgraph "Audit & Monitoring"
+        I --> T[Audit Table]
+        N --> T
+    end

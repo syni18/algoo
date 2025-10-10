@@ -1,6 +1,13 @@
 import { Request, Response } from 'express';
 
-import { checkUsernameExists, createNewUser, loginUserByIdentifier, deleteUserAccount, logoutUserAccount } from '../../services/v1-SVC/auth';
+import { 
+  checkUsernameExists, 
+  createNewUser, 
+  loginUserByIdentifier, 
+  deleteUserAccount, 
+  logoutUserAccount, 
+  requestPasswordReset 
+} from '../../services/v1-SVC/auth';
 import { createAuthForUser } from '../../utils/createAuthSession';
 import { sendResponse } from '../../utils/sendResponse';
 import { redisClient } from '@config/redis';
@@ -155,4 +162,9 @@ export const logoutUser = async (req: Request, res: Response) => {
     data: null,
     message: 'User Logout Successfully.'
   })
+}
+
+export const forgetUser = async (req: Request, res: Response) => {
+  const { identifier } = req.body;
+  const r = await requestPasswordReset(identifier);
 }

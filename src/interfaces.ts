@@ -256,3 +256,10 @@ export interface User {
   middle_name: string | null;
   last_name: string | null;
 }
+
+export interface EmailPayload {
+  to: string;
+  subject: string;
+  html: string;
+  attachments?: Array<{ filename: string; content: any }>;
+}
