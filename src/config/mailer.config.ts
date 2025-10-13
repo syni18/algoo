@@ -5,6 +5,7 @@ import logger from 'logger/winston-logger';
 export const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST!,
   port: Number(process.env.SMTP_PORT!),
+  name: process.env.SMTP_HOST! || 'localhost',
   secure: Boolean(process.env.SMTP_SECURE!), // true for 465, false for other ports
   requireTLS: true,
   pool: true,

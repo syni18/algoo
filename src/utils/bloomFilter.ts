@@ -1,4 +1,6 @@
-import { BloomFilter } from 'bloom-filters';
+import bloomFilters from 'bloom-filters';
+const BloomFilter = bloomFilters.BloomFilter;
+
 import { EventEmitter } from 'events';
 import debounce from 'lodash.debounce';
 
@@ -16,7 +18,7 @@ type BloomFilterConfig = {
 };
 
 class BloomFilterService extends EventEmitter {
-  private bloomFilter: BloomFilter | null = null;
+  private bloomFilter: InstanceType<typeof BloomFilter> | null = null;
   private config: BloomFilterConfig;
   private initializing = false;
   private initialized = false;

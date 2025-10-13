@@ -57,9 +57,13 @@ export const mailWorker = new Worker(
       // Send email with additional retry logic for transient errors
       await backOff(
         () => transporter.sendMail({
-          from: process.env.SMTP_SENDER,
+          from: process.env.SMTP_SENDER!,
           to,
           subject,
+          headers: {
+            'X-Entity-Ref-ID': crypto.randomUUID(),
+            'Message-ID': `<${crypto.randomUUID()}@${process.env.HOSTNAME!}>`
+          },
           html,
           ...(attachments && { attachments })
         }),

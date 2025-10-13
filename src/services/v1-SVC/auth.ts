@@ -8,7 +8,8 @@ import { User } from '../../interfaces';
 import bloomFilterService from '../../utils/bloomFilter';
 import { generateReferralCode } from '../../utils/referalCode';
 import { timestampFormatGmt } from '../../utils/timestamp-format';
-// import { sendPasswordResetEmail } from '../../utils/mailer/mailer';
+import { enqueueMail } from '../../utils/mailer/emailEnqueue';
+import { passwordResetEmail } from '../../utils/template/resetPassword';
 
 export const checkUsernameExists = async (username: string): Promise<object> => {
   if (!username) {
@@ -242,7 +243,7 @@ export const logoutUserAccount = async (
     query(sessionQ, [id])
   ]);
 
-  if(r.rowCount === 0) {
+  if (r.rowCount === 0) {
     throw new HttpError('Unauthorized Access', 401);
   }
 
@@ -257,18 +258,18 @@ const hashToken = (token: string) => crypto.createHash("sha256").update(token).d
 
 export const requestPasswordReset = async (
   identifier: string
-): Promise<void> => {
+): Promise<{ jobid?: string, auditid?: string, message: string }> => {
   const idf = identifier.trim().toLowerCase();
 
   const checkQ = `SELECT id, email, username
     FROM users
-    WHERE (email = $1 OR username = $1 OR phone = $1)
+    WHERE (LOWER(email) = $1 OR username = $1 OR phone = $1)
       AND deleted_at IS NULL
     LIMIT 1;`;
-  
+
   const userExist = await query(checkQ, [idf]);
-  if(userExist.rowCount === 0){
-    return;
+  if (userExist.rowCount === 0) {
+    throw new HttpError('Invalid Credentials.', 401);
   }
 
   const user = userExist.rows[0];
@@ -283,13 +284,36 @@ export const requestPasswordReset = async (
     SET password_reset_token = $1,
         password_reset_expires = $2,
         updated_at = NOW()
-    WHERE id = $3;
+    WHERE id = $3
+    RETURNING id;
   `;
-  await query(saveQ, [dbToken, expireAt.toISOString(), user.id]);
+  const saveR = await query(saveQ, [dbToken, expireAt.toISOString(), user.id]);
+  if (!saveR.rowCount) throw new HttpError("Failed to generate reset Link.", 500);
 
-  // await sendPasswordResetEmail(user.email, {
-  //   username: user.username,
-  //   resetLink: `${process.env.HTTPS_SERVER!}://${process.env.HOSTNAME!}:${process.env.PORT!}/reset-password?token=${rawToken}`,
-  //   expiresInMinutes: Number(process.env.RESET_TOKEN_TTL_MIN!),
-  // });
+  // send email
+  const resetPasswordHtml = passwordResetEmail(
+    user.username,
+    rawToken,
+    process.env.RESET_TOKEN_TTL_MIN!,
+    process.env.HTTPS_SERVER!,
+    process.env.HOSTNAME!,
+    process.env.PORT!
+  );
+
+  const mailJob = await enqueueMail({
+    to: user.email,
+    subject: 'Password Reset Request',
+    type: 'password-reset',
+    html: resetPasswordHtml,
+    metadata: {
+      userId: user.id,
+      emailType: 'password-reset'
+    }
+  });
+
+  return {
+    jobid: mailJob.jobId,
+    auditid: mailJob.auditId,
+    message: 'Reset password email sent successfully.'
+  };
 }

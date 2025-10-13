@@ -167,4 +167,12 @@ export const logoutUser = async (req: Request, res: Response) => {
 export const forgetUser = async (req: Request, res: Response) => {
   const { identifier } = req.body;
   const r = await requestPasswordReset(identifier);
+
+  return sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    data: r,
+    message: 'A password reset link has been sent to the registered email address.',
+  });
 }
