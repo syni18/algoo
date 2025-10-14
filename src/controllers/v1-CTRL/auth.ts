@@ -6,11 +6,13 @@ import {
   loginUserByIdentifier, 
   deleteUserAccount, 
   logoutUserAccount, 
-  requestPasswordReset 
+  requestPasswordReset,
+  resetOldPassword
 } from '../../services/v1-SVC/auth';
 import { createAuthForUser } from '../../utils/createAuthSession';
 import { sendResponse } from '../../utils/sendResponse';
 import { redisClient } from '@config/redis';
+import logger from 'logger/winston-logger';
 
 const cookieOptions = {
   httpOnly: true,
@@ -174,5 +176,20 @@ export const forgetUser = async (req: Request, res: Response) => {
     success: true,
     data: r,
     message: 'A password reset link has been sent to the registered email address.',
+  });
+}
+
+export const resetUser = async (req: Request, res: Response) => {
+  // Reset password logic here
+  const { token } = req.params as { token: string };
+  const { password } = req.body;
+  const r = await resetOldPassword(token, password);
+
+  return sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    data: r,
+    message: 'Password reset successfully.',
   });
 }

@@ -143,7 +143,7 @@ export const passwordResetEmail = (
 
           <p style="text-align: center;">
             <a
-              href="${server}://${hostname}:${port}/reset-password?token=${rawToken}"
+              href="${server}://${hostname}:${port}/api/auth/reset-password?token=${rawToken}"
               target="_blank"
               rel="noopener noreferrer"
               class="button"

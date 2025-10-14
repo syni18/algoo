@@ -81,6 +81,19 @@ export const forgetUserInputSchema = z.object({
     ),
 });
 
+export const resetTokenSchema = z.object({
+  token: z.string().min(1, 'Invalid Request.'),
+});
+
+export const resetUserInputSchema = z.object({
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters long')
+    .max(100, 'Password must not exceed 100 characters'),
+});
+
+export type ResetTokenParam = z.infer<typeof resetTokenSchema>; 
+export type ResetUserBody = z.infer<typeof resetUserInputSchema>;
 export type ForgetUserBody = z.infer<typeof forgetUserInputSchema>;
 export type DeleteUserBody = z.infer<typeof deleteUserInputSchema>;
 export type LoginUserBody = z.infer<typeof loginUserInputSchema>;

@@ -317,3 +317,44 @@ export const requestPasswordReset = async (
     message: 'Reset password email sent successfully.'
   };
 }
+
+export const resetOldPassword = async (
+  token: string,
+  password: string
+): Promise<{ success: boolean, message: string }> => {
+  const dbToken = hashToken(token);
+  
+  const checkQ = `SELECT id, password_hash, password_reset_expires
+    FROM users
+    WHERE password_reset_token = $1
+      AND password_reset_expires > NOW()
+    LIMIT 1;`;
+
+  const user = await query(checkQ, [dbToken]);
+  if (user.rowCount === 0) {
+    throw new HttpError('Invalid or expired token.', 401);
+  }
+
+  const { id, password_hash } = user.rows[0];
+
+  const isSameHash = await argonVerifyPassword(password_hash, password);
+  if (isSameHash) {
+    throw new HttpError('New password must be different from the old password.', 400);
+  }
+
+  const hash = await argonHashPassword(password);
+
+  // Update password
+  const updateQ = `UPDATE users
+    SET password_hash = $1,
+        password_reset_token = NULL,
+        password_reset_expires = NULL,
+        updated_at = NOW()
+    WHERE id = $2;`;
+  await query(updateQ, [hash, id]);
+
+  return {
+    success: true,
+    message: 'Password reset successfully.',
+  };
+}
