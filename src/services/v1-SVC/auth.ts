@@ -295,9 +295,9 @@ export const requestPasswordReset = async (
     user.username,
     rawToken,
     process.env.RESET_TOKEN_TTL_MIN!,
-    process.env.HTTPS_SERVER!,
-    process.env.HOSTNAME!,
-    process.env.PORT!
+    process.env.UI_PROTOCOL!,
+    process.env.UI_HOSTNAME!,
+    process.env.UI_PORT!
   );
 
   const mailJob = await enqueueMail({
@@ -358,3 +358,50 @@ export const resetOldPassword = async (
     message: 'Password reset successfully.',
   };
 }
+
+export const changeUserPassword = async (
+  id: string,
+  oldPassword: string,
+  newPassword: string
+): Promise<{ row: { id: string, email: string, username: string },success: boolean, message: string }> => {
+  
+  const checkQ = `SELECT id, password_hash, email, username
+    FROM users
+    WHERE id = $1
+    LIMIT 1;`;
+
+  const userExist = await query(checkQ, [id]);
+  if (userExist.rowCount === 0) {
+    throw new HttpError('Unauthorized Access', 401);
+  }
+
+  const isMatch = await argonVerifyPassword(userExist.rows[0].password_hash, oldPassword);
+  if (!isMatch) {
+    throw new HttpError('Unauthorized Access', 401);
+  }
+
+  const isSameHash = await argonVerifyPassword(userExist.rows[0].password_hash, newPassword);
+  if (isSameHash) {
+    throw new HttpError('New password must be different from the old password.', 400);
+  }
+
+  const hash = await argonHashPassword(newPassword);
+
+  const updateQ = `UPDATE users
+    SET password_hash = $1,
+        updated_at = NOW(),
+        updated_by = $2
+    WHERE id = $3;`;
+
+  await query(updateQ, [hash, id, id]);
+
+  return {
+    row: {
+      id: userExist.rows[0].id,
+      email: userExist.rows[0].email,
+      username: userExist.rows[0].username
+    },
+    success: true,
+    message: 'Password changed successfully.'
+  };
+};

@@ -4,7 +4,7 @@ import { redisClient } from '../config/redis';
 
 const SESSION_EXPIRE_SECONDS: number = parseInt(process.env.SESSION_EXPIRE_SECONDS!); // 7 days in seconds
 
-export async function createSession(userId: number): Promise<string> {
+export async function createSession(userId: string): Promise<string> {
   const sessionId = uuidv4();
   await redisClient.set(`sess:${sessionId}`, userId.toString(), 'EX', SESSION_EXPIRE_SECONDS);
   return sessionId;

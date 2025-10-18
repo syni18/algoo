@@ -6,7 +6,7 @@ import { createSession } from './createSession';
 import { timestampFormatGmt } from './timestamp-format';
 
 export const createAuthForUser = async (
-  id: number,
+  id: string,
   email: string,
   username: string,
   ip: string,

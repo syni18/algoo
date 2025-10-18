@@ -25,14 +25,14 @@ const refreshExpiresMs = ms(REFRESH_TOKEN_EXPIRES_IN);
 
 // -------------------- Interfaces --------------------
 export interface TokenPayload {
-  userId: number;
+  userId: string;
   email?: string;
   roles?: string[];
   [key: string]: any; // flexible for extra claims
 }
 
 export interface DecodedToken extends JwtPayload {
-  userId: number;
+  userId: string;
   email?: string;
   roles?: string[];
 }

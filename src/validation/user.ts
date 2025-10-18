@@ -92,6 +92,19 @@ export const resetUserInputSchema = z.object({
     .max(100, 'Password must not exceed 100 characters'),
 });
 
+export const changePasswordInputSchema = z.object({
+  id: z.string().min(1, 'Unauthorized access.'),
+  oldPassword: z
+    .string()
+    .min(8, 'Old password must be at least 8 characters long')
+    .max(100, 'Old password must not exceed 100 characters'),
+  newPassword: z
+    .string()
+    .min(8, 'New password must be at least 8 characters long')
+    .max(100, 'New password must not exceed 100 characters'),
+});
+
+export type ChangePasswordBody = z.infer<typeof changePasswordInputSchema>;
 export type ResetTokenParam = z.infer<typeof resetTokenSchema>; 
 export type ResetUserBody = z.infer<typeof resetUserInputSchema>;
 export type ForgetUserBody = z.infer<typeof forgetUserInputSchema>;

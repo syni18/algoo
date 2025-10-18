@@ -7,7 +7,8 @@ import {
   deleteUserAccount, 
   logoutUserAccount, 
   requestPasswordReset,
-  resetOldPassword
+  resetOldPassword,
+  changeUserPassword
 } from '../../services/v1-SVC/auth';
 import { createAuthForUser } from '../../utils/createAuthSession';
 import { sendResponse } from '../../utils/sendResponse';
@@ -193,3 +194,51 @@ export const resetUser = async (req: Request, res: Response) => {
     message: 'Password reset successfully.',
   });
 }
+
+export const changePassword = async (req: Request, res: Response) => {
+  const ip = req.ip!;
+  const userAgent = req.headers['user-agent'] || null;
+  const sessionId = req.cookies.sessionId;
+  const { id, oldPassword, newPassword } = req.body;
+  const r = await changeUserPassword(id, oldPassword, newPassword);
+
+  if(r.success){
+    res.clearCookie('accessToken',{
+      ...cookieOptions
+    });
+    res.clearCookie('refreshToken', {
+      ...cookieOptions
+    });
+    res.clearCookie('sessionId', {
+      ...cookieOptions
+    })
+
+    await redisClient.del(`sess:${sessionId}`);
+  }
+
+  // new tokens for new password
+  const auth = await createAuthForUser(r.row.id, r.row.email, r.row.username, ip, userAgent);
+
+  res.cookie('accessToken', auth.accessToken, {
+    ...cookieOptions,
+    maxAge: auth.accessTokenExpiresAt - Date.now(),
+  });
+
+  res.cookie('refreshToken', auth.refreshToken, {
+    ...cookieOptions,
+    maxAge: auth.refreshTokenExpiresAt - Date.now(),
+  });
+
+  res.cookie('sessionId', auth.sessionId, {
+    ...cookieOptions,
+    maxAge: Number(process.env.SESSION_EXPIRE_SECONDS!),
+  });
+
+  return sendResponse({
+    res,
+    statusCode: 200,
+    success: true,
+    data: r,
+    message: 'Password changed successfully.',
+  });
+};

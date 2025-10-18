@@ -47,7 +47,7 @@ async function initializeServices() {
       checkDatabaseConnections(),
       checkRedisConnection(),
       checkInfluxConnection(),
-      verifyMailerConnection()
+      // verifyMailerConnection()
     ]);
 
     // Initialize Bloom filter after database is confirmed working
