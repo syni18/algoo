@@ -28,18 +28,16 @@ export const createUserInputSchema = z.object({
 });
 
 export const loginUserInputSchema = z.object({
-  identifier: z
-    .string()
-    .refine(
-      (val) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const usernameRegex = /^[a-zA-Z0-9_]+$/; // letters, numbers, underscores
-        return emailRegex.test(val) || usernameRegex.test(val);
-      },
-      {
-        message: 'Please enter valid credentials.',
-      }
-    ),
+  identifier: z.string().refine(
+    (val) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const usernameRegex = /^[a-zA-Z0-9_]+$/; // letters, numbers, underscores
+      return emailRegex.test(val) || usernameRegex.test(val);
+    },
+    {
+      message: 'Please enter valid credentials.',
+    },
+  ),
   password: z
     .string()
     .min(8, 'Password must be at least 8 characters long')
@@ -47,8 +45,7 @@ export const loginUserInputSchema = z.object({
 });
 
 export const deleteUserInputSchema = z.object({
-  id: z
-    .string(),
+  id: z.string(),
   username: z
     .string()
     .min(3, 'Username must be at least 3 characters long')
@@ -62,23 +59,20 @@ export const deleteUserInputSchema = z.object({
     .string()
     .min(8, 'Password must be at least 8 characters long')
     .max(100, 'Password must not exceed 100 characters'),
-  delete_reason: z
-    .string()
-})
+  delete_reason: z.string(),
+});
 
 export const forgetUserInputSchema = z.object({
-  identifier: z
-    .string()
-    .refine(
-      (val) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const usernameRegex = /^[a-zA-Z0-9_]+$/; // letters, numbers, underscores
-        return emailRegex.test(val) || usernameRegex.test(val);
-      },
-      {
-        message: 'Please enter valid credentials.',
-      }
-    ),
+  identifier: z.string().refine(
+    (val) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const usernameRegex = /^[a-zA-Z0-9_]+$/; // letters, numbers, underscores
+      return emailRegex.test(val) || usernameRegex.test(val);
+    },
+    {
+      message: 'Please enter valid credentials.',
+    },
+  ),
 });
 
 export const resetTokenSchema = z.object({
@@ -105,7 +99,7 @@ export const changePasswordInputSchema = z.object({
 });
 
 export type ChangePasswordBody = z.infer<typeof changePasswordInputSchema>;
-export type ResetTokenParam = z.infer<typeof resetTokenSchema>; 
+export type ResetTokenParam = z.infer<typeof resetTokenSchema>;
 export type ResetUserBody = z.infer<typeof resetUserInputSchema>;
 export type ForgetUserBody = z.infer<typeof forgetUserInputSchema>;
 export type DeleteUserBody = z.infer<typeof deleteUserInputSchema>;

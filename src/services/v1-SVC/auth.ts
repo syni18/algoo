@@ -1,15 +1,15 @@
-import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 
 import { query } from '../../config/postgres';
 import { argonHashPassword, argonVerifyPassword } from '../../encryption/HASHING';
 import { HttpError } from '../../errors/HttpError';
 import { User } from '../../interfaces';
 import bloomFilterService from '../../utils/bloomFilter';
-import { generateReferralCode } from '../../utils/referalCode';
-import { timestampFormatGmt } from '../../utils/timestamp-format';
 import { enqueueMail } from '../../utils/mailer/emailEnqueue';
+import { generateReferralCode } from '../../utils/referalCode';
 import { passwordResetEmail } from '../../utils/template/resetPassword';
+import { timestampFormatGmt } from '../../utils/timestamp-format';
 
 export const checkUsernameExists = async (username: string): Promise<object> => {
   if (!username) {
@@ -92,7 +92,7 @@ export const createNewUser = async (
 export const loginUserByIdentifier = async (
   identifier: string,
   password: string,
-  ip: string
+  ip: string,
 ): Promise<User> => {
   const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
 
@@ -101,7 +101,6 @@ export const loginUserByIdentifier = async (
        FROM users WHERE email = $1 LIMIT 1;`
     : `SELECT id, login_count, failed_login_attempts, locked_until, password_hash
        FROM users WHERE username = $1 LIMIT 1;`;
-
 
   const userExist = await query(sql, [identifier]);
 
@@ -113,7 +112,7 @@ export const loginUserByIdentifier = async (
   if (userExist.rows[0].locked_until && new Date(userExist.rows[0].locked_until) > new Date()) {
     throw new HttpError(
       `Account locked until ${timestampFormatGmt(userExist.rows[0].locked_until)}. Try again after some time..`,
-      403
+      403,
     );
   }
 
@@ -121,9 +120,10 @@ export const loginUserByIdentifier = async (
   const isMatch = await argonVerifyPassword(userExist.rows[0].password_hash, password);
   if (!isMatch) {
     const newAttempts = userExist.rows[0].failed_login_attempts + 1;
-    const lockedUntil = newAttempts >= Number(process.env.FAILED_LOGIN_ATTEMPT_LIMIT!)
-      ? new Date(Date.now() + Number(process.env.LOCKED_UNTIL!))
-      : null;
+    const lockedUntil =
+      newAttempts >= Number(process.env.FAILED_LOGIN_ATTEMPT_LIMIT!)
+        ? new Date(Date.now() + Number(process.env.LOCKED_UNTIL!))
+        : null;
 
     await query(
       `UPDATE users
@@ -132,11 +132,14 @@ export const loginUserByIdentifier = async (
            updated_at = NOW(),
            locked_until = $4
        WHERE id = $1;`,
-      [userExist.rows[0].id, newAttempts, ip, lockedUntil]
+      [userExist.rows[0].id, newAttempts, ip, lockedUntil],
     );
 
     if (lockedUntil) {
-      throw new HttpError(`Account locked due to multiple failed login attempts. Try again after 10 minutes.`, 403);
+      throw new HttpError(
+        `Account locked due to multiple failed login attempts. Try again after 10 minutes.`,
+        403,
+      );
     }
 
     throw new HttpError('Invalid credentials.', 401);
@@ -159,8 +162,8 @@ export const loginUserByIdentifier = async (
     userExist.rows[0].id,
     ip,
     userExist.rows[0].login_count + 1,
-    userExist.rows[0].id
-  ])
+    userExist.rows[0].id,
+  ]);
 
   return res.rows[0];
 };
@@ -170,8 +173,8 @@ export const deleteUserAccount = async (
   username: string,
   email: string,
   password: string,
-  delete_reason: string
-): Promise<{ success: boolean, message: string }> => {
+  delete_reason: string,
+): Promise<{ success: boolean; message: string }> => {
   email = email.trim().toLowerCase();
 
   const checkQ = `SELECT id, password_hash 
@@ -205,7 +208,7 @@ export const deleteUserAccount = async (
     true,
     userExist.rows[0].id,
     delete_reason,
-    userExist.rows[0].id
+    userExist.rows[0].id,
   ]);
 
   const sessionQ = `DELETE FROM user_sessions WHERE user_id = $1;`;
@@ -213,13 +216,11 @@ export const deleteUserAccount = async (
 
   return {
     success: true,
-    message: 'account inactive successfully.'
-  }
-}
+    message: 'account inactive successfully.',
+  };
+};
 
-export const logoutUserAccount = async (
-  id: string
-): Promise<{ id: string, success: boolean }> => {
+export const logoutUserAccount = async (id: string): Promise<{ id: string; success: boolean }> => {
   const logoutQ = `UPDATE users
     SET 
       locked_until = NULL,
@@ -238,10 +239,7 @@ export const logoutUserAccount = async (
     WHERE user_id = $1
       AND is_active = true;`;
 
-  const [r, _] = await Promise.all([
-    query(logoutQ, [id]),
-    query(sessionQ, [id])
-  ]);
+  const [r, _] = await Promise.all([query(logoutQ, [id]), query(sessionQ, [id])]);
 
   if (r.rowCount === 0) {
     throw new HttpError('Unauthorized Access', 401);
@@ -249,16 +247,16 @@ export const logoutUserAccount = async (
 
   return {
     id: r.rows[0].id,
-    success: true
-  }
-}
+    success: true,
+  };
+};
 
 // helper: hash token for storing in DB
-const hashToken = (token: string) => crypto.createHash("sha256").update(token).digest("hex");
+const hashToken = (token: string) => crypto.createHash('sha256').update(token).digest('hex');
 
 export const requestPasswordReset = async (
-  identifier: string
-): Promise<{ jobid?: string, auditid?: string, message: string }> => {
+  identifier: string,
+): Promise<{ jobid?: string; auditid?: string; message: string }> => {
   const idf = identifier.trim().toLowerCase();
 
   const checkQ = `SELECT id, email, username
@@ -274,7 +272,7 @@ export const requestPasswordReset = async (
 
   const user = userExist.rows[0];
 
-  // token 
+  // token
   const rawToken = crypto.randomBytes(32).toString('hex');
   const dbToken = hashToken(rawToken);
   const expireAt = new Date(Date.now() + Number(process.env.RESET_TOKEN_TTL_MIN!) * 60 * 1000);
@@ -288,7 +286,7 @@ export const requestPasswordReset = async (
     RETURNING id;
   `;
   const saveR = await query(saveQ, [dbToken, expireAt.toISOString(), user.id]);
-  if (!saveR.rowCount) throw new HttpError("Failed to generate reset Link.", 500);
+  if (!saveR.rowCount) throw new HttpError('Failed to generate reset Link.', 500);
 
   // send email
   const resetPasswordHtml = passwordResetEmail(
@@ -297,7 +295,7 @@ export const requestPasswordReset = async (
     process.env.RESET_TOKEN_TTL_MIN!,
     process.env.UI_PROTOCOL!,
     process.env.UI_HOSTNAME!,
-    process.env.UI_PORT!
+    process.env.UI_PORT!,
   );
 
   const mailJob = await enqueueMail({
@@ -307,23 +305,23 @@ export const requestPasswordReset = async (
     html: resetPasswordHtml,
     metadata: {
       userId: user.id,
-      emailType: 'password-reset'
-    }
+      emailType: 'password-reset',
+    },
   });
 
   return {
     jobid: mailJob.jobId,
     auditid: mailJob.auditId,
-    message: 'Reset password email sent successfully.'
+    message: 'Reset password email sent successfully.',
   };
-}
+};
 
 export const resetOldPassword = async (
   token: string,
-  password: string
-): Promise<{ success: boolean, message: string }> => {
+  password: string,
+): Promise<{ success: boolean; message: string }> => {
   const dbToken = hashToken(token);
-  
+
   const checkQ = `SELECT id, password_hash, password_reset_expires
     FROM users
     WHERE password_reset_token = $1
@@ -357,14 +355,17 @@ export const resetOldPassword = async (
     success: true,
     message: 'Password reset successfully.',
   };
-}
+};
 
 export const changeUserPassword = async (
   id: string,
   oldPassword: string,
-  newPassword: string
-): Promise<{ row: { id: string, email: string, username: string },success: boolean, message: string }> => {
-  
+  newPassword: string,
+): Promise<{
+  row: { id: string; email: string; username: string };
+  success: boolean;
+  message: string;
+}> => {
   const checkQ = `SELECT id, password_hash, email, username
     FROM users
     WHERE id = $1
@@ -399,9 +400,9 @@ export const changeUserPassword = async (
     row: {
       id: userExist.rows[0].id,
       email: userExist.rows[0].email,
-      username: userExist.rows[0].username
+      username: userExist.rows[0].username,
     },
     success: true,
-    message: 'Password changed successfully.'
+    message: 'Password changed successfully.',
   };
 };

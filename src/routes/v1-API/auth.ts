@@ -1,28 +1,28 @@
 // src/routes/auth.ts
 import { Router } from 'express';
 
-import { 
-  createUser, 
-  loginUser, 
-  usernameExists, 
+import {
+  changePassword,
+  createUser,
   deleteUser,
-  logoutUser, 
-  forgetUser, 
+  forgetUser,
+  loginUser,
+  logoutUser,
   resetUser,
-  changePassword
+  usernameExists,
 } from '../../controllers/v1-CTRL/auth';
 import { Route } from '../../interfaces';
 import { catchAsync } from '../../middlewares/catchAsync';
 import { validateRequest } from '../../middlewares/validateRequest';
-import { 
-  createUserInputSchema, 
-  usernameInputSchema, 
-  loginUserInputSchema, 
-  deleteUserInputSchema, 
-  forgetUserInputSchema, 
-  resetUserInputSchema, 
+import {
+  changePasswordInputSchema,
+  createUserInputSchema,
+  deleteUserInputSchema,
+  forgetUserInputSchema,
+  loginUserInputSchema,
   resetTokenSchema,
-  changePasswordInputSchema 
+  resetUserInputSchema,
+  usernameInputSchema,
 } from '../../validation/user';
 
 const router = Router();
@@ -69,7 +69,7 @@ const routes: Route[] = [
     path: '/reset-password/:token',
     validationSchema: [
       validateRequest(resetUserInputSchema, 'body'),
-      validateRequest(resetTokenSchema, 'params')
+      validateRequest(resetTokenSchema, 'params'),
     ],
     handler: catchAsync(resetUser),
   },
@@ -78,7 +78,7 @@ const routes: Route[] = [
     path: '/change-password',
     validationSchema: validateRequest(changePasswordInputSchema, 'body'),
     handler: catchAsync(changePassword),
-  }
+  },
 ];
 
 // Dynamically register routes

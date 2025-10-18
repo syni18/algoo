@@ -6,7 +6,7 @@ export const passwordResetEmail = (
   resetTokenTTL: string,
   server: string,
   hostname: string,
-  port: string
+  port: string,
 ): string => {
   const year = new Date().getFullYear();
 

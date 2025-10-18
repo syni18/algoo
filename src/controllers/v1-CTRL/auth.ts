@@ -1,19 +1,18 @@
 import { Request, Response } from 'express';
 
-import { 
-  checkUsernameExists, 
-  createNewUser, 
-  loginUserByIdentifier, 
-  deleteUserAccount, 
-  logoutUserAccount, 
+import { redisClient } from '../../config/redis';
+import {
+  changeUserPassword,
+  checkUsernameExists,
+  createNewUser,
+  deleteUserAccount,
+  loginUserByIdentifier,
+  logoutUserAccount,
   requestPasswordReset,
   resetOldPassword,
-  changeUserPassword
 } from '../../services/v1-SVC/auth';
 import { createAuthForUser } from '../../utils/createAuthSession';
 import { sendResponse } from '../../utils/sendResponse';
-import { redisClient } from '@config/redis';
-import logger from 'logger/winston-logger';
 
 const cookieOptions = {
   httpOnly: true,
@@ -69,7 +68,6 @@ export const loginUser = async (req: Request, res: Response) => {
     },
     message: 'Account Login Successfully.',
   });
-
 };
 
 export const createUser = async (req: Request, res: Response) => {
@@ -82,7 +80,7 @@ export const createUser = async (req: Request, res: Response) => {
   // token + session
   const auth = await createAuthForUser(r.id, r.email, r.username, ip, userAgent);
 
-  // set http cookies 
+  // set http cookies
   res.cookie('accessToken', auth.accessToken, {
     ...cookieOptions,
     maxAge: auth.accessTokenExpiresAt - Date.now(),
@@ -115,16 +113,16 @@ export const deleteUser = async (req: Request, res: Response) => {
   const { id, username, email, password, delete_reason } = req.body;
   const r = await deleteUserAccount(id, username, email, password, delete_reason);
 
-  if(r.success){
-    res.clearCookie('accessToken',{
-      ...cookieOptions
+  if (r.success) {
+    res.clearCookie('accessToken', {
+      ...cookieOptions,
     });
     res.clearCookie('refreshToken', {
-      ...cookieOptions
+      ...cookieOptions,
     });
     res.clearCookie('sessionId', {
-      ...cookieOptions
-    })
+      ...cookieOptions,
+    });
 
     await redisClient.del(`sess:${sessionId}`);
   }
@@ -134,9 +132,9 @@ export const deleteUser = async (req: Request, res: Response) => {
     statusCode: 200,
     success: true,
     data: null,
-    message: 'Account delete Successfully.'
-  })
-}
+    message: 'Account delete Successfully.',
+  });
+};
 
 export const logoutUser = async (req: Request, res: Response) => {
   const { id } = req.body;
@@ -144,16 +142,16 @@ export const logoutUser = async (req: Request, res: Response) => {
 
   const r = await logoutUserAccount(id);
 
-  if(r.success){
-    res.clearCookie('accessToken',{
-      ...cookieOptions
+  if (r.success) {
+    res.clearCookie('accessToken', {
+      ...cookieOptions,
     });
     res.clearCookie('refreshToken', {
-      ...cookieOptions
+      ...cookieOptions,
     });
     res.clearCookie('sessionId', {
-      ...cookieOptions
-    })
+      ...cookieOptions,
+    });
 
     await redisClient.del(`sess:${sessionId}`);
   }
@@ -163,9 +161,9 @@ export const logoutUser = async (req: Request, res: Response) => {
     statusCode: 200,
     success: true,
     data: null,
-    message: 'User Logout Successfully.'
-  })
-}
+    message: 'User Logout Successfully.',
+  });
+};
 
 export const forgetUser = async (req: Request, res: Response) => {
   const { identifier } = req.body;
@@ -178,7 +176,7 @@ export const forgetUser = async (req: Request, res: Response) => {
     data: r,
     message: 'A password reset link has been sent to the registered email address.',
   });
-}
+};
 
 export const resetUser = async (req: Request, res: Response) => {
   // Reset password logic here
@@ -193,7 +191,7 @@ export const resetUser = async (req: Request, res: Response) => {
     data: r,
     message: 'Password reset successfully.',
   });
-}
+};
 
 export const changePassword = async (req: Request, res: Response) => {
   const ip = req.ip!;
@@ -202,16 +200,16 @@ export const changePassword = async (req: Request, res: Response) => {
   const { id, oldPassword, newPassword } = req.body;
   const r = await changeUserPassword(id, oldPassword, newPassword);
 
-  if(r.success){
-    res.clearCookie('accessToken',{
-      ...cookieOptions
+  if (r.success) {
+    res.clearCookie('accessToken', {
+      ...cookieOptions,
     });
     res.clearCookie('refreshToken', {
-      ...cookieOptions
+      ...cookieOptions,
     });
     res.clearCookie('sessionId', {
-      ...cookieOptions
-    })
+      ...cookieOptions,
+    });
 
     await redisClient.del(`sess:${sessionId}`);
   }

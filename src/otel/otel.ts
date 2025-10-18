@@ -1,15 +1,15 @@
 // src/otel/otel.ts
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { resourceFromAttributes } from '@opentelemetry/resources';
-import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '../../node_modules/@opentelemetry/auto-instrumentations-node';
+import { PrometheusExporter } from '../../node_modules/@opentelemetry/exporter-prometheus';
+import { OTLPTraceExporter } from '../../node_modules/@opentelemetry/exporter-trace-otlp-http';
+import { resourceFromAttributes } from '../../node_modules/@opentelemetry/resources';
+import { NodeSDK } from '../../node_modules/@opentelemetry/sdk-node';
 import {
   SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
   SEMRESATTRS_SERVICE_INSTANCE_ID,
   SEMRESATTRS_SERVICE_NAME,
   SEMRESATTRS_SERVICE_NAMESPACE,
-} from '@opentelemetry/semantic-conventions';
+} from '../../node_modules/@opentelemetry/semantic-conventions';
 
 const otelConfig = {
   prometheus: {

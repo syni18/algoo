@@ -27,7 +27,7 @@ const redisClient = new Redis({
   host: process.env.REDIS_HOST,
   port: Number(process.env.REDIS_PORT) || 6379,
   // password: process.env.REDIS_PASSWORD, // uncomment if password set
-  maxRetriesPerRequest: null,    // use null for BullMQ compatibility [mail worker issue]
+  maxRetriesPerRequest: null, // use null for BullMQ compatibility [mail worker issue]
   // maxRetriesPerRequest: 5,
   connectTimeout: 10000,
 });

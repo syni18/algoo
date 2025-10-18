@@ -1,5 +1,6 @@
 // src/app.ts
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import cors, { CorsOptionsDelegate } from 'cors';
 import express, { Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
@@ -10,7 +11,6 @@ import path from 'path';
 import type { Metric } from 'prom-client';
 import * as promClient from 'prom-client';
 import toobusy from 'toobusy-js';
-import cookieParser from 'cookie-parser';
 
 import { renderHealthHTML } from './HTML/healthView';
 // Custom modules

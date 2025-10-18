@@ -1,29 +1,26 @@
 // admin/dlq.ts
-import { Queue } from "bullmq";
-import { redisClient } from "../../config/redis";
-import { mailQueue } from "./emailEnqueue";
-import logger from "logger/winston-logger";
+import { Queue } from 'bullmq';
 
-const DLQ_NAME = "email-dlq";
+import { redisClient } from '../../config/redis';
+import logger from '../../logger/winston-logger';
+import { mailQueue } from './emailEnqueue';
+
+const DLQ_NAME = 'email-dlq';
 
 // List all DLQ jobs
 export async function listDlqJobs(limit = 100) {
   const dlq = new Queue(DLQ_NAME, { connection: redisClient });
-  
-  const jobs = await dlq.getJobs(
-    ["waiting", "completed", "failed", "delayed"],
-    0,
-    limit
-  );
 
-  return jobs.map(job => ({
+  const jobs = await dlq.getJobs(['waiting', 'completed', 'failed', 'delayed'], 0, limit);
+
+  return jobs.map((job) => ({
     id: job.id,
     data: job.data,
     attemptsMade: job.attemptsMade,
     failedReason: job.failedReason,
     timestamp: job.timestamp,
     processedOn: job.processedOn,
-    finishedOn: job.finishedOn
+    finishedOn: job.finishedOn,
   }));
 }
 
@@ -31,7 +28,7 @@ export async function listDlqJobs(limit = 100) {
 export async function getDlqJob(jobId: string) {
   const dlq = new Queue(DLQ_NAME, { connection: redisClient });
   const job = await dlq.getJob(jobId);
-  
+
   if (!job) {
     throw new Error(`DLQ job ${jobId} not found`);
   }
@@ -42,7 +39,7 @@ export async function getDlqJob(jobId: string) {
     attemptsMade: job.attemptsMade,
     failedReason: job.failedReason,
     stacktrace: job.stacktrace,
-    timestamp: job.timestamp
+    timestamp: job.timestamp,
   };
 }
 
@@ -58,28 +55,24 @@ export async function requeueDlqJob(jobId: string) {
   const payload = job.data.originalJob;
 
   // Add back to main queue
-  const newJob = await mailQueue.add(
-    `email:${payload.type || "generic"}`,
-    payload,
-    {
-      attempts: 5,
-      backoff: { type: "exponential", delay: 1000 }
-    }
-  );
+  const newJob = await mailQueue.add(`email:${payload.type || 'generic'}`, payload, {
+    attempts: 5,
+    backoff: { type: 'exponential', delay: 1000 },
+  });
 
   // Remove from DLQ
   await job.remove();
 
-  logger.info("Job requeued from DLQ", { 
-    dlqJobId: jobId, 
+  logger.info('Job requeued from DLQ', {
+    dlqJobId: jobId,
     newJobId: newJob.id,
-    to: payload.to 
+    to: payload.to,
   });
 
-  return { 
-    dlqJobId: jobId, 
+  return {
+    dlqJobId: jobId,
     newJobId: newJob.id,
-    status: "requeued"
+    status: 'requeued',
   };
 }
 
@@ -109,20 +102,20 @@ export async function deleteDlqJob(jobId: string) {
   }
 
   await job.remove();
-  logger.info("DLQ job deleted", { jobId });
+  logger.info('DLQ job deleted', { jobId });
 
-  return { jobId, status: "deleted" };
+  return { jobId, status: 'deleted' };
 }
 
 // Get DLQ statistics
 export async function getDlqStats() {
   const dlq = new Queue(DLQ_NAME, { connection: redisClient });
-  
+
   const [waiting, completed, failed, delayed] = await Promise.all([
     dlq.getWaitingCount(),
     dlq.getCompletedCount(),
     dlq.getFailedCount(),
-    dlq.getDelayedCount()
+    dlq.getDelayedCount(),
   ]);
 
   return {
@@ -130,6 +123,6 @@ export async function getDlqStats() {
     completed,
     failed,
     delayed,
-    total: waiting + completed + failed + delayed
+    total: waiting + completed + failed + delayed,
   };
 }

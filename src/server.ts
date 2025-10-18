@@ -10,6 +10,8 @@ import { checkRedisConnection } from './config/redis';
 
 register('ts-node/esm', pathToFileURL('./'));
 
+import './utils/mailer/mailWorker';
+
 import fs from 'fs';
 import https from 'https';
 
@@ -19,10 +21,8 @@ import { shutdownMetricsPool, startPeriodicMetricsRefresh } from './system/index
 import bloomFilterService from './utils/bloomFilter';
 import gracefulShutdown from './utils/gracefulShutdown';
 import { closeWebSocketServer, setupWebSocketServer } from './wss';
-import { verifyMailerConnection } from './config/mailer.config';
-import './utils/mailer/mailWorker';
 
-const port = process.env.PORT ? Number(process.env.PORT!) : 8888;
+const port = process.env.PORT ? Number(process.env.PORT) : 8888;
 const sslKeyPath = process.env.SSL_KEY;
 const sslCertPath = process.env.SSL_CERT;
 

@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+
 import { query } from '../config/postgres';
 import { generateTokens } from '../encryption/JWT';
 import { HttpError } from '../errors/HttpError';
