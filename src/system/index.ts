@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { ExtendedMetricsSnapshot } from '../interfaces';
 import logger from '../logger/winston-logger';
 import { WorkerPool } from '../utils/workerThread'; // Import the scalable WorkerPool class
+import { JobType } from 'types/types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,7 +32,7 @@ let lastMetricsSnapshot: any = null;
 export async function collectMetrics(): Promise<ExtendedMetricsSnapshot | null> {
   try {
     const metrics = await metricsWorkerPool.runJob(
-      { type: 'collect-metrics' },
+      { type: JobType.COLLECT_METRICS },
       Number(process.env.WORKERPOOL_TIMEOUTMS),
     );
     lastMetricsSnapshot = metrics;
