@@ -21,6 +21,8 @@ import { shutdownMetricsPool, startPeriodicMetricsRefresh } from './system/index
 import bloomFilterService from './utils/bloomFilter';
 import gracefulShutdown from './utils/gracefulShutdown';
 import { closeWebSocketServer, setupWebSocketServer } from './wss';
+import { getIndexSnapshot } from 'nse';
+import { startPeriodicNseRefresh } from 'nse/api/nseClient';
 
 const port = process.env.PORT ? Number(process.env.PORT) : 8888;
 const sslKeyPath = process.env.SSL_KEY;
@@ -108,6 +110,8 @@ setupWebSocketServer(server);
 
 // Initially collect metrics
 startPeriodicMetricsRefresh();
+
+startPeriodicNseRefresh();
 
 // Cleanup logic for graceful shutdown
 const cleanup = async () => {

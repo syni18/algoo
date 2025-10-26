@@ -117,11 +117,15 @@ export interface Job {
   message: any;
   resolve: (result: any) => void;
   reject: (error: any) => void;
-  timeout?: NodeJS.Timeout;
+  timeout?: NodeJS.Timeout | null;
+  createdAt?: number;
 }
 
 export interface WorkerMessage {
   type?: string;
+  url?: string;
+  taskId?: number;
+  [key: string]: any;
 }
 
 export interface BatteryInfo {

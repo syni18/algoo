@@ -77,5 +77,3 @@ src/test/
 # bloom filter data
 data/
 docs/
-
-src/nse/

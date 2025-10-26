@@ -23,7 +23,10 @@ const ext = isDist ? '.js' : '.ts';
 
 const metricsWorkerPath = path.resolve(__dirname, `./system-metrics${ext}`);
 
-const metricsWorkerPool = new WorkerPool(metricsWorkerPath, Number(process.env.WORKERPOOL_SIZE));
+const metricsWorkerPool = new WorkerPool({
+  workerScriptPath: metricsWorkerPath,
+  poolSize: Number(process.env.WORKERPOOL_SIZE)
+});
 
 // Cached last metrics snapshot
 let lastMetricsSnapshot: any = null;
