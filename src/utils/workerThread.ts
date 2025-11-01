@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import os from 'os';
 import { Worker } from 'worker_threads';
 import { Job } from '../interfaces';
+import logger from '../logger/winston-logger';
 
 // ✅ CRITICAL: Define __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -34,17 +35,17 @@ export class WorkerPool extends EventEmitter {
   constructor(opts: WorkerPoolOptions) {
     super();
     // ✅ VALIDATE INPUT
-  if (!opts || typeof opts.workerScriptPath !== 'string') {
-    throw new Error(
-      `WorkerPool requires 'workerScriptPath' as string, got: ${typeof opts?.workerScriptPath}\n` +
-      `Received opts: ${JSON.stringify(opts, null, 2)}`
-    );
-  }
-  
-  // ✅ Handle both absolute and relative paths
-  this.workerScriptPath = path.isAbsolute(opts.workerScriptPath)
-    ? opts.workerScriptPath
-    : path.resolve(__dirname, opts.workerScriptPath);
+    if (!opts || typeof opts.workerScriptPath !== 'string') {
+      throw new Error(
+        `WorkerPool requires 'workerScriptPath' as string, got: ${typeof opts?.workerScriptPath}\n` +
+        `Received opts: ${JSON.stringify(opts, null, 2)}`
+      );
+    }
+
+    // ✅ Handle both absolute and relative paths
+    this.workerScriptPath = path.isAbsolute(opts.workerScriptPath)
+      ? opts.workerScriptPath
+      : path.resolve(__dirname, opts.workerScriptPath);
     this.poolSize = opts.poolSize ?? Math.max(1, Math.floor(os.cpus().length / 2));
     this.jobDefaultTimeoutMs = opts.jobDefaultTimeoutMs ?? Number(process.env.WORKERPOOL_DEFAULT_MS ?? 30_000);
     this.respawnBackoffMs = opts.respawnBackoffMs ?? 1000;
@@ -56,17 +57,29 @@ export class WorkerPool extends EventEmitter {
     const isTsFile = this.workerScriptPath.endsWith('.ts');
 
     const worker = new Worker(this.workerScriptPath, {
-      execArgv: isTsFile ? ['--loader', 'ts-node/esm'] : [], // 👈 use ts-node only for .ts
+      execArgv: isTsFile ? [
+          '--loader', 'ts-node/esm',
+          '--experimental-specifier-resolution=node',  // 👈 Allow extension-less imports
+          '--no-warnings'
+        ] : [], // 👈 use ts-node only for .ts
     });
 
     this.emit("worker:spawn", { pid: worker.threadId });
     worker.on('message', (msg) => this.finishJob(worker, msg));
     worker.on("error", (err) => {
-      this.emit("worker:error", { err, pid: worker.threadId });
+      this.emit("worker:error", {
+        err,
+        pid: worker.threadId,
+        message: err.message,
+        stack: err.stack
+      });
+      logger.error(`❌ Worker ${worker.threadId} error:`, err);
       this.respawnWorker(worker);
     });
+
     worker.on("exit", (code) => {
       this.emit("worker:exit", { code, pid: worker.threadId });
+      logger.warn(`⚠️ Worker ${worker.threadId} exited with code ${code}`);
       if (code !== 0) this.respawnWorker(worker);
     });
 
@@ -223,7 +236,7 @@ export class WorkerPool extends EventEmitter {
     const stop = new Promise<void>((resolve) => {
       const timer = setTimeout(async () => {
         // Force terminate remaining workers
-        await Promise.all(this.workers.map((w) => w.terminate().catch(() => {})));
+        await Promise.all(this.workers.map((w) => w.terminate().catch(() => { })));
         this.workers = [];
         this.busyWorkers.clear();
         this.activeJobMap.clear();

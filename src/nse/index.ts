@@ -1,5 +1,5 @@
 import { WorkerMessage } from 'interfaces';
-import logger from 'logger/winston-logger';
+import logger from '../logger/winston-logger';
 import { parentPort } from 'worker_threads';
 import { getNseCookie } from './utils/nseCookie';
 
@@ -37,10 +37,8 @@ if (port) {
 
 
 export async function getIndexSnapshot(url: string): Promise<any> {
-
   try {
     const cookies = await getNseCookie();
-    // Now make the API call with cookies
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -57,11 +55,11 @@ export async function getIndexSnapshot(url: string): Promise<any> {
     }
 
     const data = await response.json();
-    logger.debug("data", data);
+    logger.debug("NSE data fetched:", data);
     return data;
-  } catch (err) {
-    console.error('Fetch error:', err);
-    throw err;
+  } catch (err: any) {
+    logger.error('❌ NSE fetch error:', err);
+    throw new Error(`NSE fetch failed: ${err.message}`);
   }
 }
 
